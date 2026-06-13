@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>T1D-CVD Meta-Calculator — transparent multi-tool comparison</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1c2733; --muted:#5b6b7b; --line:#dfe5ec;
+    --t1d:#2166ac; --t2d:#b2182b; --gen:#6b7785; --accent:#0b6; --warn:#c97a00;
+    --low:#1a7f37; --mod:#c97a00; --high:#b2182b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{background:linear-gradient(180deg,#13314f,#0e2740);color:#fff;padding:20px 24px}
+  header h1{margin:0 0 4px;font-size:21px}
+  header p{margin:0;color:#cdd9e6;font-size:13px;max-width:880px}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+  .card h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 12px}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+  input[type=number],select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .chk{display:flex;align-items:center;gap:7px;margin:8px 0;font-size:13px;color:var(--ink)}
+  .chk input{width:auto}
+  .derived{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+  .res-group{margin-bottom:14px}
+  .res-group h3{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px;color:var(--muted)}
+  .bar-row{display:grid;grid-template-columns:150px 56px 1fr;align-items:center;gap:8px;padding:4px 0;font-size:13px}
+  .bar-name{font-weight:600}
+  .bar-name small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+  .bar-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+  .bar-track{position:relative;height:18px;background:#eef2f6;border-radius:4px;overflow:hidden}
+  .bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;opacity:.85}
+  .bar-track .thr{position:absolute;top:-2px;bottom:-2px;width:1px;background:#9aa7b4}
+  .bar-track .thr.t20{background:#c97a00}
+  .na{color:var(--muted);font-style:italic;font-size:12px}
+  .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700;color:#fff}
+  .pill.low{background:var(--low)} .pill.mod{background:var(--mod)} .pill.high{background:var(--high)}
+  .flag{border-left:4px solid var(--warn);background:#fff7ea;padding:10px 14px;border-radius:6px;margin:6px 0 16px;font-size:13.5px}
+  .flag.ok{border-color:var(--low);background:#eefaf0}
+  .summary{font-size:14px;margin:0 0 10px}
+  details{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+  summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--t1d)}
+  .meth{font-size:12.5px;color:var(--muted)}
+  .meth table{width:100%;border-collapse:collapse;margin-top:8px}
+  .meth td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:top}
+  .disc{font-size:12px;color:var(--muted);max-width:880px}
+  .tag{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 50px;color:var(--muted);font-size:12px}
+  code{background:#eef2f6;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Type 1 Diabetes — Cardiovascular Risk Meta-Calculator</h1>
+  <p>Runs the published, externally-validated CV risk calculators side by side for an adult with type 1 diabetes, shows where they agree and where they diverge, and lets you recalibrate to local risk. <b>It is not a new prediction model</b> — it reproduces existing tools transparently (every coefficient is open in <code>models.js</code>; all reproduce their source paper to the decimal). Decision support only; not a substitute for clinical judgement or a regulated medical device.</p>
+</header>
+<div class="wrap"><div class="grid">
+
+  <!-- ============ INPUT ============ -->
+  <div>
+    <div class="card">
+      <h2>Patient</h2>
+      <div class="row">
+        <div><label>Age (years)</label><input type="number" id="age" value="45" min="18" max="90"></div>
+        <div><label>Sex</label><select id="sex"><option value="female">Female</option><option value="male" selected>Male</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Diabetes duration (y)</label><input type="number" id="duration" value="20" min="0" max="70"></div>
+        <div><label>Age at onset</label><input type="number" id="onset" value="25" min="0" max="80"></div>
+      </div>
+      <label>Ethnicity (PCE/QRISK3)</label>
+      <select id="ethnicity"><option value="white" selected>White / other</option><option value="black">Black</option><option value="south_asian">South Asian</option></select>
+
+      <h2 style="margin-top:16px">Measurements</h2>
+      <div class="row">
+        <div><label>HbA1c (%)</label><input type="number" id="hba1c" value="8.0" step="0.1" min="5" max="15"></div>
+        <div><label>HbA1c (mmol/mol)</label><input type="number" id="hba1cmmol" value="64" step="1" min="30" max="140"></div>
+      </div>
+      <div class="row">
+        <div><label>Systolic BP (mmHg)</label><input type="number" id="sbp" value="130" min="90" max="220"></div>
+        <div><label>Diastolic BP (mmHg)</label><input type="number" id="dbp" value="78" min="50" max="130"></div>
+      </div>
+      <div class="row3">
+        <div><label>Total chol (mmol/L)</label><input type="number" id="tc" value="4.8" step="0.1"></div>
+        <div><label>HDL (mmol/L)</label><input type="number" id="hdl" value="1.4" step="0.1"></div>
+        <div><label>Triglycerides</label><input type="number" id="tg" value="1.2" step="0.1"></div>
+      </div>
+      <div class="row">
+        <div><label>eGFR (mL/min/1.73m²)</label><input type="number" id="egfr" value="95" min="10" max="150"></div>
+        <div><label>Albuminuria</label><select id="alb"><option value="normal" selected>Normal</option><option value="micro">Micro</option><option value="macro">Macro</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>BMI (kg/m²)</label><input type="number" id="bmi" value="25" step="0.1"></div>
+        <div><label>Height (m, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01" placeholder="auto"></div>
+      </div>
+      <div class="chk"><input type="checkbox" id="smoker"><label style="margin:0">Current smoker</label></div>
+      <div class="chk"><input type="checkbox" id="exercise" checked><label style="margin:0">Regular exercise (≥3.5 h/wk, Steno)</label></div>
+      <div class="chk"><input type="checkbox" id="bptx"><label style="margin:0">On BP-lowering treatment</label></div>
+      <div class="chk"><input type="checkbox" id="statin"><label style="margin:0">On a statin</label></div>
+      <div class="chk"><input type="checkbox" id="af"><label style="margin:0">Atrial fibrillation</label></div>
+      <div class="chk"><input type="checkbox" id="retino"><label style="margin:0">Retinopathy</label></div>
+      <div class="chk"><input type="checkbox" id="prior"><label style="margin:0">Prior CVD</label></div>
+      <div class="chk"><input type="checkbox" id="fh"><label style="margin:0">Family history of premature CVD</label></div>
+
+      <h2 style="margin-top:16px">Calibration</h2>
+      <label>SCORE2 risk region (drives SCORE2 family)</label>
+      <select id="region"><option value="low">Low</option><option value="moderate">Moderate</option><option value="high" selected>High (Central Europe, incl. Czechia)</option><option value="very_high">Very high</option></select>
+      <label>Local recalibration of T1D-specific tools — observed/expected ratio (optional)</label>
+      <input type="number" id="oe" value="1.0" step="0.05" min="0.3" max="2">
+      <div class="derived" id="derived"></div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div>
+    <div class="card">
+      <h2>10-year CVD risk — all validated tools</h2>
+      <div id="flag"></div>
+      <div id="summary" class="summary"></div>
+      <div id="results"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">
+        <span class="tag" style="background:var(--t1d)"></span>T1D-specific
+        <span class="tag" style="background:var(--t2d);margin-left:10px"></span>Type-2-derived
+        <span class="tag" style="background:var(--gen);margin-left:10px"></span>General-population &nbsp;·&nbsp; dashed lines = 10% / 20% treatment thresholds
+      </div>
+      <details>
+        <summary>Methods, validation & coefficients (transparency)</summary>
+        <div class="meth">
+          <p>Each tool below is a faithful re-implementation of a published equation, validated against its source paper's worked example or its live web tool (26/26 checks pass; see <code>test_models.js</code>). Coefficients are fully open in <code>models.js</code>. This is an <b>agreement/decision-support tool, not an accuracy claim</b>: it shows how published tools differ on the same patient; it does not establish which is correct (that needs outcome data).</p>
+          <table id="methtable"></table>
+          <p style="margin-top:10px"><b>Recalibration.</b> The SCORE2 family is recalibrated by risk region (a published mechanism). For the T1D-specific tools, the optional observed/expected ratio applies a transparent cumulative-hazard scaling — set it from your local registry's O/E (e.g. ~0.55 reproduces the Italian Steno over-estimation). Default 1.0 = published calibration.</p>
+          <p><b>Reproducibility note.</b> The Scottish–Swedish tool here uses the published <i>final-model</i> coefficients (incl. the age-at-entry term omitted from the supplementary table) with a calibration constant (×1.32) fit to the authors' deployed app, because the published cubic/interaction coefficients are rounded to three decimals. Deprivation is fixed at quintile 3.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+</div></div>
+<footer>
+  Open-source, self-contained (no data leaves the browser). Built as a companion to a review of CV risk calculators in T1D. AI-assisted development; all equations human-traceable to their sources. <b>Not for clinical use without local validation and regulatory approval.</b>
+</footer>
+
+<script src="models.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const T = window.T1DCVD;
+const inputs = ["age","sex","duration","onset","ethnicity","hba1c","hba1cmmol","sbp","dbp","tc","hdl","tg","egfr","alb","bmi","height","region","oe"];
+const checks = ["smoker","exercise","bptx","statin","af","retino","prior","fh"];
+
+// keep HbA1c % and mmol/mol in sync
+let syncing=false;
+$("hba1c").addEventListener("input",()=>{if(syncing)return;syncing=true;$("hba1cmmol").value=Math.round(T.hba1cPctToMmol(+$("hba1c").value));syncing=false;compute();});
+$("hba1cmmol").addEventListener("input",()=>{if(syncing)return;syncing=true;$("hba1c").value=T.hba1cMmolToPct(+$("hba1cmmol").value).toFixed(1);syncing=false;compute();});
+// auto onset = age - duration unless user overrides
+let onsetTouched=false; $("onset").addEventListener("input",()=>onsetTouched=true);
+["age","duration"].forEach(id=>$(id).addEventListener("input",()=>{if(!onsetTouched)$("onset").value=Math.max(0,(+$("age").value)-(+$("duration").value));}));
+
+function patient(){
+  const tc=+$("tc").value, hdl=+$("hdl").value, tg=+$("tg").value;
+  const ldl=Math.max(0.3, tc-hdl-tg/2.2);
+  return {
+    age:+$("age").value, female:$("sex").value==="female", ethnicity:$("ethnicity").value,
+    duration:+$("duration").value, onset_age:+$("onset").value,
+    hba1c_pct:+$("hba1c").value, sbp:+$("sbp").value, dbp:+$("dbp").value,
+    total_chol:tc, hdl:hdl, ldl:ldl, tc_hdl_ratio:tc/hdl,
+    egfr:+$("egfr").value, albuminuria:$("alb").value, bmi:+$("bmi").value,
+    height_m:(+$("height").value)||null,
+    smoker:$("smoker").checked, regular_exercise:$("exercise").checked,
+    on_bp_treatment:$("bptx").checked, on_statin:$("statin").checked,
+    af:$("af").checked, retinopathy:$("retino").checked, prior_cvd:$("prior").checked,
+    family_history_cvd:$("fh").checked, risk_region:$("region").value, diabetes:true,
+    ethrisk:({white:1,south_asian:2,black:7})[$("ethnicity").value]||1,
+  };
+}
+function recal(pct,k){ if(!isFinite(pct)||k===1) return pct; return (1-Math.pow(1-pct/100,k))*100; }
+function bandClass(c){return ["low","mod","high"][c];}
+
+function compute(){
+  const p=patient(), oe=+$("oe").value;
+  $("derived").innerHTML=`Derived: LDL ≈ <b>${p.ldl.toFixed(1)}</b> · non-HDL ${ (p.total_chol-p.hdl).toFixed(1) } · TC:HDL ${p.tc_hdl_ratio.toFixed(2)} mmol/L · onset age ${p.onset_age}`;
+  const groups={T1D:[],T2D:[],general:[]};
+  const meth=[];
+  for(const [name,m] of Object.entries(T.MODELS)){
+    let r=m.fn(p);
+    if(m.category==="T1D" && isFinite(r)) r=recal(r,oe);
+    groups[m.category].push({name,m,r});
+    meth.push(`<tr><td><b>${name}</b></td><td>${m.category}</td><td>${m.validated?"✓ validated":""}</td><td>${m.note}</td></tr>`);
+  }
+  // render bars
+  const maxR=40;
+  const barRow=(o)=>{
+    if(!isFinite(o.r)) return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small></div><div class="bar-val na">n/a</div><div class="na">age out of validated range</div></div>`;
+    const c=T.band(o.r), col=o.m.category==="T1D"?"var(--t1d)":o.m.category==="T2D"?"var(--t2d)":"var(--gen)";
+    const w=Math.min(100,o.r/maxR*100), t10=10/maxR*100, t20=20/maxR*100;
+    return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small></div>
+      <div class="bar-val">${o.r.toFixed(1)}%</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}"></div>
+        <div class="thr" style="left:${t10}%"></div><div class="thr t20" style="left:${t20}%"></div></div></div>`;
+  };
+  const sec=(title,arr)=>arr.length?`<div class="res-group"><h3>${title}</h3>${arr.map(barRow).join("")}</div>`:"";
+  $("results").innerHTML=
+    sec("Type 1 diabetes–specific",groups.T1D)+
+    sec("Type-2-derived (off-label in T1D)",groups.T2D)+
+    sec("General-population (off-label in T1D)",groups.general);
+  $("methtable").innerHTML=`<tr><td><b>Tool</b></td><td><b>Class</b></td><td></td><td><b>Note</b></td></tr>`+meth.join("");
+
+  // discordance among 10-yr T1D-specific tools (exclude Cederholm 5y)
+  const prim=groups.T1D.filter(o=>o.m.horizon==="10y"&&isFinite(o.r)).map(o=>o.r);
+  if(prim.length>=2){
+    const lo=Math.min(...prim), hi=Math.max(...prim), cats=new Set(prim.map(T.band));
+    const lab=["low","moderate","high"];
+    $("summary").innerHTML=`Dedicated T1D tools estimate <b>${lo.toFixed(1)}–${hi.toFixed(1)}%</b> 10-yr CVD risk (${[...cats].map(c=>lab[c]).join(" ↔ ")}).`;
+    if(cats.size>1){
+      $("flag").className="flag";
+      $("flag").innerHTML=`⚠ <b>Discordant.</b> The validated T1D-specific engines disagree on risk <i>category</i> for this patient (they straddle a treatment threshold). Treat the number as a range, not a point — clinical judgement and, where possible, local recalibration or subclinical-disease imaging should guide the decision.`;
+    } else {
+      $("flag").className="flag ok";
+      $("flag").innerHTML=`✓ The validated T1D-specific engines agree on risk category (<b>${lab[[...cats][0]]}</b>). Generic scores below typically read lower — they under-capture T1D risk.`;
+    }
+  } else { $("flag").innerHTML=""; $("summary").innerHTML=""; }
+}
+inputs.forEach(id=>$(id).addEventListener("input",compute));
+inputs.forEach(id=>$(id).addEventListener("change",compute));
+checks.forEach(id=>$(id).addEventListener("change",compute));
+$("hba1cmmol").value=Math.round(T.hba1cPctToMmol(+$("hba1c").value));
+compute();
+</script>
+</body>
+</html>

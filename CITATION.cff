@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software or its data/figures, please cite the associated paper and this repository."
+title: "T1D-CVD risk calculators: reproducible in-silico discordance analysis and an open multi-tool meta-calculator"
+abstract: "Open re-implementations of published cardiovascular risk calculators relevant to type 1 diabetes, a seeded synthetic-cohort discordance analysis, and a transparent browser meta-calculator."
+type: software
+version: 1.0.0
+date-released: 2026-06-13
+license: MIT
+authors:
+  # TODO: fill in the first author's name and ORCID (matches the manuscript author order)
+  - given-names: "FIRST-AUTHOR-GIVEN"
+    family-names: "FIRST-AUTHOR-FAMILY"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+  - given-names: "Michaela"
+    family-names: "Liegertová"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO
+# doi: 10.5281/zenodo.XXXXXXX   # TODO: added automatically on first Zenodo release
