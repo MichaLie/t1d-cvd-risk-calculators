@@ -2,9 +2,10 @@
 Model registry: maps a calculator name -> callable(Patient, years) -> risk in %.
 
 Each adapter translates the unified Patient into the inputs that model needs and
-returns absolute risk as a PERCENT (0-100). As coefficient specs are validated,
-new adapters are appended here. Every adapter must be validated against its live
-web tool (or a paper worked example) before it is trusted in the eval.
+returns absolute risk as a PERCENT (0-100). The registry inclusion flag means an
+endpoint is included in the in-silico agreement analysis; endpoint-specific
+implementation and validation caveats are documented in the repository and
+meta-tool rather than collapsed into a single "validated" label.
 """
 from __future__ import annotations
 from ..models.steno_t1 import StenoPatient, steno_risk
@@ -67,10 +68,12 @@ def _scotswed(p) -> float:
     # Final-model (Table 2) coefficients incl. age-at-entry; deprivation set to a
     # representative middle quintile (3) for a non-SIMD cohort; cal=1.32 absorbs the
     # publication-rounding level offset, fit to the deployed Shiny calculator.
+    retinopathy = "nonref" if p.retinopathy else "none"
     return scottish_swedish_risk(
         female=p.female, age=p.age, duration=p.duration, hba1c_mmol=p.hba1c_mmol,
         sbp=p.sbp, tc_hdl_ratio=p.tc_hdl_ratio, egfr=p.egfr, bmi=p.bmi,
-        albuminuria=p.albuminuria, smoker=p.smoker, treated_htn=p.on_bp_treatment,
+        albuminuria=p.albuminuria, retinopathy=retinopathy, smoker=p.smoker,
+        treated_htn=p.on_bp_treatment,
         treated_dyslip=p.on_statin, af=p.af,
         variant="main", deprivation_quintile=3, cal=1.32)
 
@@ -99,8 +102,9 @@ def _advance(p) -> float:
                         treated_htn=p.on_bp_treatment, horizon=10)
 
 
-# name -> (category, validated, fn). validated=True means checked vs live web tool
-# or the source paper's own worked example.
+# name -> (category, include_in_analysis, fn). Inclusion means the endpoint is
+# used in the agreement analysis; it is not a claim of external/live-tool
+# validation for every endpoint.
 REGISTRY = {
     "Steno-CVD":        ("T1D", True,  lambda p, years=10: _steno(p, years, "cvd")),
     "Steno-IHDstroke":  ("T1D", True,  lambda p, years=10: _steno(p, years, "ihd_stroke")),
@@ -118,8 +122,8 @@ REGISTRY = {
 }
 
 
-def validated_models() -> list[str]:
-    return [n for n, (_c, ok, _f) in REGISTRY.items() if ok]
+def analysis_models() -> list[str]:
+    return [n for n, (_c, include, _f) in REGISTRY.items() if include]
 
 
 def all_models() -> list[str]:

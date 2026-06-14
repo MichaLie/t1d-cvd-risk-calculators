@@ -12,6 +12,8 @@ and confirmed by the extraction pass to reproduce the paper's worked examples.
   risk = 1 - exp(-exp(s1 + s2*ln(-ln(1-unc)))) (region+sex recalibration)
 
 Endpoint: 10-yr first fatal/non-fatal CVD (CV death + non-fatal MI + stroke).
+Intended age range: 40-79 years; returns NaN outside this range rather than
+extrapolating.
 NOTE: derived & validated in TYPE 2 diabetes only. Applying it to T1D is exactly
 the 'borrowing' scenario the review interrogates.
 """
@@ -48,7 +50,12 @@ def score2_diabetes_risk(*, female: bool, age: float, smoker: bool, sbp: float,
                          total_chol: float, hdl: float, age_at_diagnosis: float,
                          hba1c_mmol: float, egfr: float, region: str = "high",
                          diabetes: bool = True) -> float:
-    """Return 10-yr CVD risk (%). Inputs in mmol/L, mmol/mol (HbA1c), mL/min/1.73m2."""
+    """Return 10-yr CVD risk (%), or NaN outside ages 40-79.
+
+    Inputs in mmol/L, mmol/mol (HbA1c), and mL/min/1.73m2.
+    """
+    if not (40 <= age < 80):
+        return float("nan")
     sex = "female" if female else "male"
     b = B[sex]
     dm = 1.0 if diabetes else 0.0

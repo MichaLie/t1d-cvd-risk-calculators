@@ -1,15 +1,15 @@
 /*
  * T1D-CVD meta-calculator — open, transparent risk-model engine.
  *
- * Pure JavaScript ports of published cardiovascular risk equations, validated
- * against each source paper's worked example (or the live web tool). Every
+ * Pure JavaScript ports of published cardiovascular risk equations, checked
+ * against source-paper worked examples or live tools where available. Every
  * coefficient is in this file — no hidden parameters. Runs in the browser and
  * in Node (for the test harness).
  *
- * IMPORTANT: this engine does not invent a new model. It reproduces existing,
- * published, externally-validated calculators so they can be run side by side,
- * compared, and recalibrated transparently. It is an agreement/decision-support
- * tool, NOT a validated accuracy claim.
+ * IMPORTANT: this engine does not invent a new model. It reproduces published
+ * calculator equations with endpoint-specific validation status so they can be
+ * run side by side, compared, and recalibrated transparently. It is an
+ * agreement/decision-support tool, NOT a validated accuracy claim.
  *
  * Units (canonical): cholesterol mmol/L; HbA1c % (DCCT) with mmol/mol helper;
  * SBP/DBP mmHg; eGFR mL/min/1.73m2.
@@ -271,7 +271,8 @@
   }
 
   // ----------------------------------------------------------------- model registry
-  // category: T1D | T2D | general ; validated: true = reproduces source paper / live tool.
+  // category: T1D | T2D | general ; validated: true = reference/live-tool
+  // implementation check, not external validation in a T1D outcomes cohort.
   const MODELS = {
     "Steno-CVD":        { category: "T1D", horizon: "10y", validated: true, fn: (p) => steno(p, 10, "cvd"), note: "Composite incl. heart failure & PAD. Web-validated to the decimal." },
     "Steno-IHD/stroke": { category: "T1D", horizon: "10y", validated: false, fn: (p) => steno(p, 10, "ihd_stroke"), note: "Secondary IHD-or-stroke endpoint from the Steno paper's secondary analysis; not exposed by the public web tool, coefficients not yet re-verified against the supplement." },

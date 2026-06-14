@@ -8,6 +8,8 @@ Crucially, QRISK3 has SEPARATE type-1 and type-2 diabetes terms -> it is the
 only general tool here that does not treat T1D as generic diabetes.
 
 risk% = 100 * (1 - S0 ** exp(LP)); each continuous term centered individually.
+For missing SBP SD (sbps5), ClinRisk/QRISK3 uses raw 0 and then applies the
+published centering constant.
 Returns NaN outside 25-84.
 """
 from __future__ import annotations
@@ -103,7 +105,8 @@ def qrisk3_risk(*, female: bool, age: float, ethrisk: int = 1, smoke_cat: int = 
     # center
     age1 -= c["age1"]; age2 -= c["age2"]; bmi1 -= c["bmi1"]; bmi2 -= c["bmi2"]
     rati_c = rati - c["rati"]; sbp_c = sbp - c["sbp"]; town_c = town - c["town"]
-    sbps5_c = 0.0 if sbps5 is None else (sbps5 - c["sbps5"])
+    sbps5_raw = 0.0 if sbps5 is None else sbps5
+    sbps5_c = sbps5_raw - c["sbps5"]
 
     a = IETH[sex][ethrisk] + ISMOKE[sex][smoke_cat]
     a += age1 * m["age1"] + age2 * m["age2"] + bmi1 * m["bmi1"] + bmi2 * m["bmi2"]

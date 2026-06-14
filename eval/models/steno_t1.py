@@ -2,8 +2,7 @@
 Steno Type 1 Risk Engine (Vistisen et al., Circulation 2016).
 
 Re-implementation from the published coefficients in the paper's Supplemental
-Material (Supplemental Tables 3 and 4), shipped in this repo at:
-  STENO1/2016_..._appendix.docx
+Material (Supplemental Tables 3 and 4).
 
 Model form (per the appendix):
     LP = alpha + sum_i beta_i * x_i
@@ -73,7 +72,7 @@ class StenoPatient:
     duration: float            # diabetes duration, years
     sbp: float                 # systolic BP, mmHg
     ldl: float                 # LDL cholesterol, mmol/L
-    hba1c_pct: float           # HbA1c in % (DCCT) -> converted internally
+    hba1c_pct: float           # HbA1c in % (DCCT) -> converted before use
     egfr: float                # mL/min/1.73 m^2
     albuminuria: str = "normal"  # 'normal' | 'micro' | 'macro'
     smoker: bool = False

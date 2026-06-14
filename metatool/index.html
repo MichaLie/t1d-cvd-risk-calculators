@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
 <title>T1D-CVD Meta-Calculator — transparent multi-tool comparison</title>
 <style>
   :root{
@@ -51,13 +52,14 @@
   .disc{font-size:12px;color:var(--muted);max-width:880px}
   .tag{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
   footer{max-width:1180px;margin:0 auto;padding:0 24px 50px;color:var(--muted);font-size:12px}
-  code{background:#eef2f6;padding:1px 5px;border-radius:4px;font-size:12px}
+  code{background:#eef2f6;color:#16324a;border:1px solid #c5d3e1;padding:1px 5px;border-radius:4px;font-size:12px;font-weight:600}
+  header code{background:#f4f8fc;color:#102a43;border-color:#d7e6f5}
 </style>
 </head>
 <body>
 <header>
   <h1>Type 1 Diabetes — Cardiovascular Risk Meta-Calculator</h1>
-  <p>Runs the published, externally-validated CV risk calculators side by side for an adult with type 1 diabetes, shows where they agree and where they diverge, and lets you recalibrate to local risk. <b>It is not a new prediction model</b> — it reproduces existing tools transparently (every coefficient is open in <code>models.js</code>; all reproduce their source paper to the decimal). Decision support only; not a substitute for clinical judgement or a regulated medical device.</p>
+  <p>Runs implemented published CV risk calculators side by side for an adult with type 1 diabetes, shows where they agree and where they diverge, and lets you recalibrate to local risk. <b>It is not a new prediction model</b> — it reproduces existing tools transparently (every coefficient is open in <code>models.js</code>; validation status is reported per endpoint). Decision support only; not a substitute for clinical judgement or a regulated medical device.</p>
 </header>
 <div class="wrap"><div class="grid">
 
@@ -66,72 +68,72 @@
     <div class="card">
       <h2>Patient</h2>
       <div class="row">
-        <div><label>Age (years)</label><input type="number" id="age" value="45" min="18" max="90"></div>
-        <div><label>Sex</label><select id="sex"><option value="female">Female</option><option value="male" selected>Male</option></select></div>
+        <div><label for="age">Age (years)</label><input type="number" id="age" value="45" min="18" max="90"></div>
+        <div><label for="sex">Sex</label><select id="sex"><option value="female">Female</option><option value="male" selected>Male</option></select></div>
       </div>
       <div class="row">
-        <div><label>Diabetes duration (y)</label><input type="number" id="duration" value="20" min="0" max="70"></div>
-        <div><label>Age at onset</label><input type="number" id="onset" value="25" min="0" max="80"></div>
+        <div><label for="duration">Diabetes duration (y)</label><input type="number" id="duration" value="20" min="0" max="70"></div>
+        <div><label for="onset">Age at onset</label><input type="number" id="onset" value="25" min="0" max="80"></div>
       </div>
-      <label>Ethnicity (PCE/QRISK3)</label>
+      <label for="ethnicity">Ethnicity (PCE/QRISK3)</label>
       <select id="ethnicity"><option value="white" selected>White / other</option><option value="black">Black</option><option value="south_asian">South Asian</option></select>
 
       <h2 style="margin-top:16px">Measurements</h2>
       <div class="row">
-        <div><label>HbA1c (%)</label><input type="number" id="hba1c" value="8.0" step="0.1" min="5" max="15"></div>
-        <div><label>HbA1c (mmol/mol)</label><input type="number" id="hba1cmmol" value="64" step="1" min="30" max="140"></div>
+        <div><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" value="8.0" step="0.1" min="5" max="15"></div>
+        <div><label for="hba1cmmol">HbA1c (mmol/mol)</label><input type="number" id="hba1cmmol" value="64" step="1" min="30" max="140"></div>
       </div>
       <div class="row">
-        <div><label>Systolic BP (mmHg)</label><input type="number" id="sbp" value="130" min="90" max="220"></div>
-        <div><label>Diastolic BP (mmHg)</label><input type="number" id="dbp" value="78" min="50" max="130"></div>
+        <div><label for="sbp">Systolic BP (mmHg)</label><input type="number" id="sbp" value="130" min="90" max="220"></div>
+        <div><label for="dbp">Diastolic BP (mmHg)</label><input type="number" id="dbp" value="78" min="50" max="130"></div>
       </div>
       <div class="row3">
-        <div><label>Total chol (mmol/L)</label><input type="number" id="tc" value="4.8" step="0.1"></div>
-        <div><label>HDL (mmol/L)</label><input type="number" id="hdl" value="1.4" step="0.1"></div>
-        <div><label>Triglycerides</label><input type="number" id="tg" value="1.2" step="0.1"></div>
+        <div><label for="tc">Total chol (mmol/L)</label><input type="number" id="tc" value="4.8" step="0.1"></div>
+        <div><label for="hdl">HDL (mmol/L)</label><input type="number" id="hdl" value="1.4" step="0.1"></div>
+        <div><label for="tg">Triglycerides</label><input type="number" id="tg" value="1.2" step="0.1"></div>
       </div>
       <div class="row">
-        <div><label>eGFR (mL/min/1.73m²)</label><input type="number" id="egfr" value="95" min="10" max="150"></div>
-        <div><label>Albuminuria</label><select id="alb"><option value="normal" selected>Normal</option><option value="micro">Micro</option><option value="macro">Macro</option></select></div>
+        <div><label for="egfr">eGFR (mL/min/1.73m²)</label><input type="number" id="egfr" value="95" min="10" max="150"></div>
+        <div><label for="alb">Albuminuria</label><select id="alb"><option value="normal" selected>Normal</option><option value="micro">Micro</option><option value="macro">Macro</option></select></div>
       </div>
       <div class="row">
-        <div><label>BMI (kg/m²)</label><input type="number" id="bmi" value="25" step="0.1"></div>
-        <div><label>Height (m, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01" placeholder="auto"></div>
+        <div><label for="bmi">BMI (kg/m²)</label><input type="number" id="bmi" value="25" step="0.1"></div>
+        <div><label for="height">Height (m, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01"></div>
       </div>
-      <div class="chk"><input type="checkbox" id="smoker"><label style="margin:0">Current smoker</label></div>
-      <div class="chk"><input type="checkbox" id="exercise" checked><label style="margin:0">Regular exercise (≥3.5 h/wk, Steno)</label></div>
-      <div class="chk"><input type="checkbox" id="bptx"><label style="margin:0">On BP-lowering treatment</label></div>
-      <div class="chk"><input type="checkbox" id="statin"><label style="margin:0">On a statin</label></div>
-      <div class="chk"><input type="checkbox" id="af"><label style="margin:0">Atrial fibrillation</label></div>
-      <div class="chk"><input type="checkbox" id="retino"><label style="margin:0">Retinopathy</label></div>
-      <div class="chk"><input type="checkbox" id="prior"><label style="margin:0">Prior CVD</label></div>
-      <div class="chk"><input type="checkbox" id="fh"><label style="margin:0">Family history of premature CVD</label></div>
+      <div class="chk"><input type="checkbox" id="smoker"><label for="smoker" style="margin:0">Current smoker</label></div>
+      <div class="chk"><input type="checkbox" id="exercise" checked><label for="exercise" style="margin:0">Regular exercise (≥3.5 h/wk, Steno)</label></div>
+      <div class="chk"><input type="checkbox" id="bptx"><label for="bptx" style="margin:0">On BP-lowering treatment</label></div>
+      <div class="chk"><input type="checkbox" id="statin"><label for="statin" style="margin:0">On a statin</label></div>
+      <div class="chk"><input type="checkbox" id="af"><label for="af" style="margin:0">Atrial fibrillation</label></div>
+      <div class="chk"><input type="checkbox" id="retino"><label for="retino" style="margin:0">Retinopathy</label></div>
+      <div class="chk"><input type="checkbox" id="prior"><label for="prior" style="margin:0">Prior CVD</label></div>
+      <div class="chk"><input type="checkbox" id="fh"><label for="fh" style="margin:0">Family history of premature CVD</label></div>
 
       <h2 style="margin-top:16px">Calibration</h2>
-      <label>SCORE2 risk region (drives SCORE2 family)</label>
+      <label for="region">SCORE2 risk region (drives SCORE2 family)</label>
       <select id="region"><option value="low">Low</option><option value="moderate">Moderate</option><option value="high" selected>High (Central Europe, incl. Czechia)</option><option value="very_high">Very high</option></select>
-      <label>Local recalibration of T1D-specific tools — observed/expected ratio (optional)</label>
+      <label for="oe">Local recalibration of T1D-specific tools — observed/expected ratio (optional)</label>
       <input type="number" id="oe" value="1.0" step="0.05" min="0.3" max="2">
-      <div class="derived" id="derived"></div>
+      <div class="derived" id="derived" aria-live="polite"></div>
     </div>
   </div>
 
   <!-- ============ RESULTS ============ -->
   <div>
     <div class="card">
-      <h2>10-year CVD risk — all validated tools</h2>
-      <div id="flag"></div>
-      <div id="summary" class="summary"></div>
-      <div id="results"></div>
+      <h2>10-year CVD risk — included tools</h2>
+      <div id="flag" aria-live="polite" aria-atomic="true"></div>
+      <div id="summary" class="summary" aria-live="polite" aria-atomic="true"></div>
+      <div id="results" aria-live="polite" aria-atomic="true"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px">
         <span class="tag" style="background:var(--t1d)"></span>T1D-specific
         <span class="tag" style="background:var(--t2d);margin-left:10px"></span>Type-2-derived
-        <span class="tag" style="background:var(--gen);margin-left:10px"></span>General-population &nbsp;·&nbsp; dashed lines = 10% / 20% treatment thresholds
+        <span class="tag" style="background:var(--gen);margin-left:10px"></span>General-population &nbsp;·&nbsp; vertical markers = 10% / 20% treatment thresholds
       </div>
       <details>
         <summary>Methods, validation & coefficients (transparency)</summary>
         <div class="meth">
-          <p>Each tool below is a faithful re-implementation of a published equation, validated against its source paper's worked example or its live web tool (26/26 checks pass; see <code>test_models.js</code>). Coefficients are fully open in <code>models.js</code>. This is an <b>agreement/decision-support tool, not an accuracy claim</b>: it shows how published tools differ on the same patient; it does not establish which is correct (that needs outcome data).</p>
+          <p>Each tool below is a transparent re-implementation of a published equation. The Node harness includes source-paper worked examples, live-tool checks where available, and regression guards (30/30 checks pass; see <code>test_models.js</code>). Coefficients are fully open in <code>models.js</code>. The Steno-IHD/stroke endpoint is included for transparency but remains flagged as pending external/live-tool validation. This is an <b>agreement/decision-support tool, not an accuracy claim</b>: it shows how published tools differ on the same patient; it does not establish which is correct (that needs outcome data).</p>
           <table id="methtable"></table>
           <p style="margin-top:10px"><b>Recalibration.</b> The SCORE2 family is recalibrated by risk region (a published mechanism). For the T1D-specific tools, the optional observed/expected ratio applies a transparent cumulative-hazard scaling — set it from your local registry's O/E (e.g. ~0.55 reproduces the Italian Steno over-estimation). Default 1.0 = published calibration.</p>
           <p><b>Reproducibility note.</b> The Scottish–Swedish tool here uses the published <i>final-model</i> coefficients (incl. the age-at-entry term omitted from the supplementary table) with a calibration constant (×1.32) fit to the authors' deployed app, because the published cubic/interaction coefficients are rounded to three decimals. Deprivation is fixed at quintile 3.</p>
@@ -142,7 +144,7 @@
 
 </div></div>
 <footer>
-  Open-source, self-contained (no data leaves the browser). Built as a companion to a review of CV risk calculators in T1D. AI-assisted development; all equations human-traceable to their sources. <b>Not for clinical use without local validation and regulatory approval.</b>
+  Open-source, self-contained (no data leaves the browser). Built as a companion to a review of CV risk calculators in T1D. All equations are human-traceable to their sources. <b>Not for clinical use without local validation and regulatory approval.</b>
 </footer>
 
 <script src="models.js"></script>
@@ -189,7 +191,7 @@ function compute(){
     let r=m.fn(p);
     if(m.category==="T1D" && isFinite(r)) r=recal(r,oe);
     groups[m.category].push({name,m,r});
-    meth.push(`<tr><td><b>${name}</b></td><td>${m.category}</td><td>${m.validated?"✓ validated":""}</td><td>${m.note}</td></tr>`);
+    meth.push(`<tr><td><b>${name}</b></td><td>${m.category}</td><td>${m.validated?"reference/live check":"pending external check"}</td><td>${m.note}</td></tr>`);
   }
   // render bars
   const maxR=40;
@@ -207,7 +209,7 @@ function compute(){
     sec("Type 1 diabetes–specific",groups.T1D)+
     sec("Type-2-derived (off-label in T1D)",groups.T2D)+
     sec("General-population (off-label in T1D)",groups.general);
-  $("methtable").innerHTML=`<tr><td><b>Tool</b></td><td><b>Class</b></td><td></td><td><b>Note</b></td></tr>`+meth.join("");
+  $("methtable").innerHTML=`<tr><td><b>Tool</b></td><td><b>Class</b></td><td><b>Status</b></td><td><b>Note</b></td></tr>`+meth.join("");
 
   // discordance among 10-yr T1D-specific tools (exclude Cederholm 5y)
   const prim=groups.T1D.filter(o=>o.m.horizon==="10y"&&isFinite(o.r)).map(o=>o.r);
@@ -217,10 +219,10 @@ function compute(){
     $("summary").innerHTML=`Dedicated T1D tools estimate <b>${lo.toFixed(1)}–${hi.toFixed(1)}%</b> 10-yr CVD risk (${[...cats].map(c=>lab[c]).join(" ↔ ")}).`;
     if(cats.size>1){
       $("flag").className="flag";
-      $("flag").innerHTML=`⚠ <b>Discordant.</b> The validated T1D-specific engines disagree on risk <i>category</i> for this patient (they straddle a treatment threshold). Treat the number as a range, not a point — clinical judgement and, where possible, local recalibration or subclinical-disease imaging should guide the decision.`;
+      $("flag").innerHTML=`⚠ <b>Discordant.</b> The included T1D-specific engines disagree on risk <i>category</i> for this patient (they straddle a treatment threshold). Treat the number as a range, not a point — clinical judgement and, where possible, local recalibration or subclinical-disease imaging should guide the decision.`;
     } else {
       $("flag").className="flag ok";
-      $("flag").innerHTML=`✓ The validated T1D-specific engines agree on risk category (<b>${lab[[...cats][0]]}</b>). Generic scores below typically read lower — they under-capture T1D risk.`;
+      $("flag").innerHTML=`✓ The included T1D-specific engines agree on risk category (<b>${lab[[...cats][0]]}</b>). Generic scores below typically read lower — they under-capture T1D risk.`;
     }
   } else { $("flag").innerHTML=""; $("summary").innerHTML=""; }
 }

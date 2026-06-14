@@ -1,4 +1,4 @@
-# Python deps for the analysis pipeline (tested on Python 3.12)
+# Python dependencies for the eval pipeline. Tested on Python 3.12.
 numpy>=1.26
 pandas>=2.0
 scipy>=1.11

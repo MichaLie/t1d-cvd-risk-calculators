@@ -1,8 +1,8 @@
 # Cardiovascular risk calculators in type 1 diabetes — code, data & open meta-calculator
 
 Open, reproducible companion to the study *"Cardiovascular risk calculators in type 1 diabetes:
-a critical appraisal of dedicated and borrowed tools, their guideline standing, and an in-silico
-head-to-head of their discordance."*
+a critical appraisal of dedicated and borrowed tools, their guideline standing, an in-silico
+head-to-head of their discordance, and an open meta-calculator."*
 
 This repository contains everything needed to reproduce the quantitative analysis and to inspect
 and run the risk calculators yourself. It has two parts:
@@ -10,7 +10,7 @@ and run the risk calculators yourself. It has two parts:
 1. **`eval/`** — a reproducible pipeline that re-implements 12 published cardiovascular-risk
    calculators from their source-paper coefficients, runs them on a seeded synthetic type-1-diabetes
    cohort, and quantifies how much they disagree (linear-weighted Cohen's κ, Bland–Altman, risk-ratio).
-2. **`metatool/`** — a self-contained browser meta-calculator that runs the validated calculators
+2. **`metatool/`** — a self-contained browser meta-calculator that runs the implemented calculators
    side by side for one patient, flags where they disagree on risk category, and lets you recalibrate
    to local risk. Every coefficient is open in `models.js`.
 
@@ -23,8 +23,9 @@ and run the risk calculators yourself. It has two parts:
 **T1D-specific:** Steno Type 1 Risk Engine, Scottish–Swedish model (McGurnaghan 2021),
 Cederholm NDR (5-year). **Type-2-derived (off-label in T1D):** SCORE2-Diabetes, UKPDS Risk Engine,
 ADVANCE. **General-population (off-label in T1D):** SCORE2, QRISK3, Pooled Cohort Equations (ACC/AHA),
-AHA PREVENT, Framingham. Each reproduces its source paper's worked example or live web tool
-(see the validation tests).
+AHA PREVENT, Framingham. The test harness checks source-paper worked examples, live-tool
+comparisons where available, and regression guards; endpoint-specific status is reported in the
+browser tool.
 
 ## Quickstart
 
@@ -34,12 +35,12 @@ Requires **Python 3.12** and (for the meta-tool tests only) **Node 18+**. No int
 pip install -r requirements.txt
 
 # reproduce the analysis (prints all statistics; writes results to eval/out/)
-python -m eval.run_eval          # mean off-diagonal κ = 0.40 ; per-tool risk summary
+python -m eval.run_eval          # mean off-diagonal κ = 0.39 ; per-tool risk summary
 python -m eval.smoke_test        # sanity check → "PIPELINE OK"
 
 # regenerate the figures
 python -m eval.figures              # κ heatmap
-python -m eval.figures_manuscript   # timeline, predictor grid, C-stat forest, risk distributions
+python -m eval.figures_companion    # timeline, predictor grid, C-stat forest, risk distributions
 python -m eval.fig_flowchart        # decision flowchart
 
 # the meta-calculator (no install, no server required)
@@ -50,6 +51,16 @@ node metatool/test_models.js        # validation: 30/30 should pass
 The synthetic cohort is generated with a fixed seed (`20260613`), so every reported number is
 exactly reproducible.
 
+## Browser meta-calculator
+
+The meta-calculator is a static browser app: it has no backend, no build step, no package install,
+and no external assets. It can be opened directly from `metatool/index.html` or served from any
+static host.
+
+For GitHub Pages, publish the repository from the root of the main branch. The top-level
+`index.html` redirects to `metatool/index.html`, so the repository Pages URL will open the
+calculator directly.
+
 ## Layout
 
 ```
@@ -57,7 +68,7 @@ eval/
   harness/      patient schema, synthetic-cohort generator, discordance metrics, model registry
   models/       one file per calculator (published coefficients, fully commented)
   run_eval.py   the main discordance run
-  figures.py, figures_manuscript.py, fig_flowchart.py
+  figures.py, figures_companion.py, fig_flowchart.py
   smoke_test.py
   out/          generated outputs (committed for convenience; all regenerable):
                   kappa_matrix.csv, cohort_risks.csv, and the six figures
@@ -68,9 +79,9 @@ metatool/
   README.md
 ```
 
-### Figures ↔ manuscript
+### Figures
 
-| Manuscript | File (`eval/out/`) |
+| Figure | File (`eval/out/`) |
 |---|---|
 | Figure 1 | fig_model_timeline.png |
 | Figure 2 | fig_predictor_grid.png |
@@ -94,8 +105,7 @@ referenced for provenance but **not redistributed here**.
 
 ## Citing
 
-Please cite the associated paper (citation added on publication) and this repository.
-A `CITATION.cff` is included; a DOI will be minted via Zenodo on the first public release.
+Please cite the associated paper and the archived repository release once available.
 
 ## Disclaimer
 

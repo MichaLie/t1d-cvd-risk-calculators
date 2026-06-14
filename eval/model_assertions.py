@@ -1,0 +1,69 @@
+"""Focused regression assertions for model implementation checks."""
+from __future__ import annotations
+
+from math import isfinite, isnan
+
+from eval.harness.models import REGISTRY
+from eval.harness.patient import Patient
+from eval.models.qrisk3 import qrisk3_risk
+from eval.models.score2_diabetes import score2_diabetes_risk
+
+
+def assert_close(name: str, got: float, expected: float, tol: float) -> None:
+    if abs(got - expected) > tol:
+        raise AssertionError(f"{name}: got {got:.12g}, expected {expected:.12g} +/- {tol}")
+
+
+def test_qrisk3_missing_sbps5() -> None:
+    params = dict(
+        female=False, age=45, ethrisk=1, smoke_cat=0, bmi=25,
+        rati=4.8 / 1.4, sbp=130, town=0, b_type1=True, b_type2=False,
+        b_AF=False, b_treatedhyp=False, b_renal=False, fh_cvd=False,
+    )
+    missing = qrisk3_risk(sbps5=None, **params)
+    raw_zero = qrisk3_risk(sbps5=0, **params)
+
+    assert_close("QRISK3 missing SBP SD uses raw zero", missing, raw_zero, 1e-12)
+    assert_close("QRISK3 canonical T1D man with missing SBP SD", missing, 7.217081960246674, 1e-9)
+
+
+def test_score2_diabetes_age_guard() -> None:
+    params = dict(
+        female=False, smoker=False, sbp=140, total_chol=5.5, hdl=1.3,
+        age_at_diagnosis=50, hba1c_mmol=50, egfr=90, region="high",
+    )
+
+    assert isnan(score2_diabetes_risk(age=39, **params))
+    assert isfinite(score2_diabetes_risk(age=40, **params))
+    assert isfinite(score2_diabetes_risk(age=79, **params))
+    assert isnan(score2_diabetes_risk(age=80, **params))
+
+
+def test_scottish_swedish_adapter_retinopathy() -> None:
+    patient = Patient(
+        age=60, female=True, duration=20, hba1c_pct=8.0, sbp=130,
+        total_chol=4.8, hdl=1.4, egfr=90, bmi=25, retinopathy=False,
+    )
+    no_retinopathy = REGISTRY["Scottish-Swedish"][2](patient)
+    with_retinopathy = REGISTRY["Scottish-Swedish"][2](patient.copy_with(retinopathy=True))
+
+    if not with_retinopathy > no_retinopathy:
+        raise AssertionError(
+            "Scottish-Swedish adapter did not increase risk when Patient.retinopathy=True"
+        )
+
+
+def main() -> None:
+    tests = [
+        test_qrisk3_missing_sbps5,
+        test_score2_diabetes_age_guard,
+        test_scottish_swedish_adapter_retinopathy,
+    ]
+    for test in tests:
+        test()
+        print(f"{test.__name__}: OK")
+    print("MODEL ASSERTIONS OK")
+
+
+if __name__ == "__main__":
+    main()

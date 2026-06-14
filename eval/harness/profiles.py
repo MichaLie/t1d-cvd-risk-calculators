@@ -14,7 +14,7 @@ Two products, serving two purposes:
 
 Distributions are anchored to contemporary adult T1D registry/cohort summaries
 (Steno derivation cohort; Scottish-Swedish / Swedish NDR). Every assumption is
-explicit here so it can be reported in the supplement and challenged by review.
+explicit here so it can be inspected, reproduced, and challenged.
 All randomness is seeded for exact reproducibility.
 """
 from __future__ import annotations

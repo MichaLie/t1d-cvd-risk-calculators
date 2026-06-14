@@ -1,9 +1,20 @@
 """Publication-style figures from the discordance run."""
+import os
+from pathlib import Path
 import numpy as np, pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+
+OUT = Path(os.environ.get("FIG_OUT_DIR", "eval/out"))
+
+def save_figure(fig, filename):
+    OUT.mkdir(parents=True, exist_ok=True)
+    path = OUT / filename
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"saved {path}")
 
 K = pd.read_csv("eval/out/kappa_matrix.csv", index_col=0)
 labels = list(K.columns)
@@ -32,5 +43,4 @@ ax.text(0.5, -0.32, f"mean off-diagonal κ = {off.mean():.2f}  "
         f"(range {off.min():.2f}–{off.max():.2f})  |  κ<0.4 = poor, 0.4–0.6 moderate, 0.6–0.8 substantial",
         transform=ax.transAxes, ha="center", fontsize=8, style="italic")
 plt.tight_layout()
-plt.savefig("eval/out/kappa_heatmap.png", dpi=170, bbox_inches="tight")
-print("saved eval/out/kappa_heatmap.png")
+save_figure(fig, "kappa_heatmap.png")

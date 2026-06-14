@@ -2,22 +2,23 @@
 Cross-model discordance run (NaN-aware: each tool scores only within its valid
 age range, comparisons are pairwise-complete).
 
-Headline uses the 5 web/example-validated calculators. Scottish-Swedish is
-reported separately as PROVISIONAL (absolute-risk calibration unresolved).
+Reports all implemented endpoints with pairwise-complete comparisons. The
+Scottish-Swedish implementation uses the published final-model specification and
+keeps the coefficient-publication caveat explicit in the repository output.
 
 NOT an accuracy study (no outcomes): this quantifies disagreement on identical
 synthetic T1D patients.
 """
 import numpy as np, pandas as pd
 from eval.harness.profiles import make_synthetic_cohort
-from eval.harness.models import REGISTRY, validated_models
+from eval.harness.models import REGISTRY, analysis_models
 from eval.harness.categories import band
 from eval.harness.discordance import cohen_kappa, agreement_rate, bland_altman, risk_ratio_summary
 
 N = 10000
 cohort = make_synthetic_cohort(N)
 ages = np.array([p.age for p in cohort])
-models = validated_models()
+models = analysis_models()
 risk = {m: np.array([REGISTRY[m][2](p) for p in cohort], float) for m in models}
 cat = {m: np.array([band(r) if np.isfinite(r) else -1 for r in risk[m]]) for m in models}
 
@@ -30,7 +31,7 @@ def both_finite(a, b, extra=None):
 
 
 print(f"=== In-silico discordance: synthetic T1D cohort n={N} (Czech/high region) ===")
-print(f"(validated models: {', '.join(models)})\n")
+print(f"(implemented endpoints: {', '.join(models)})\n")
 hdr = f"{'model':16} {'category':9} {'coverage':>8} {'mean%':>7} {'median%':>8} {'low/mod/high':>16}"
 print(hdr); print("-" * len(hdr))
 for m in models:
@@ -69,10 +70,11 @@ print("\n=== Disagreement by age band (Steno IHD/stroke vs SCORE2-Diabetes) ==="
 for lo, hi, name in [(40, 50, "40-49"), (50, 60, "50-59"), (60, 70, "60-69")]:
     pair_report("Steno-IHDstroke", "SCORE2-Diabetes", extra=(ages >= lo) & (ages < hi), label=f"age {name}")
 
-# provisional Scottish-Swedish (reported, not in headline)
+# Scottish-Swedish is included in the table above; this line makes the
+# implementation caveat visible in command-line output.
 ss = np.array([REGISTRY["Scottish-Swedish"][2](p) for p in cohort], float)
-print(f"\n[PROVISIONAL] Scottish-Swedish mean={np.nanmean(ss):.1f}% median={np.nanmedian(ss):.1f}% "
-      f"(calibration vs ESM Table 8 unresolved — excluded from headline)")
+print(f"\n[IMPLEMENTATION CAVEAT] Scottish-Swedish mean={np.nanmean(ss):.1f}% median={np.nanmedian(ss):.1f}% "
+      f"(final-model implementation; coefficient-publication caveat documented in repository)")
 
 out = pd.DataFrame({m: risk[m] for m in models}); out["age"] = ages
 out.to_csv("eval/out/cohort_risks.csv", index=False); K.to_csv("eval/out/kappa_matrix.csv")
