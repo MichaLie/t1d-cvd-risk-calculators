@@ -7,6 +7,8 @@ head-to-head of their discordance, and an open meta-calculator."*
 This repository contains everything needed to reproduce the quantitative analysis and to inspect
 and run the risk calculators yourself. It has two parts:
 
+**Launch the browser meta-calculator:** https://michalie.github.io/t1d-cvd-risk-calculators/metatool/
+
 1. **`eval/`** — a reproducible pipeline that re-implements 12 published cardiovascular-risk
    calculators from their source-paper coefficients, runs them on a seeded synthetic type-1-diabetes
    cohort, and quantifies how much they disagree (linear-weighted Cohen's κ, Bland–Altman, risk-ratio).
