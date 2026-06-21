@@ -98,7 +98,7 @@
       </div>
       <div class="row">
         <div><label for="bmi">BMI (kg/m²)</label><input type="number" id="bmi" value="25" step="0.1"></div>
-        <div><label for="height">Height (m, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01"></div>
+        <div><label for="height">Height (m or cm, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01" placeholder="auto / 1.70 / 170"></div>
       </div>
       <div class="chk"><input type="checkbox" id="smoker"><label for="smoker" style="margin:0">Current smoker</label></div>
       <div class="chk"><input type="checkbox" id="exercise" checked><label for="exercise" style="margin:0">Regular exercise (≥3.5 h/wk, Steno)</label></div>
@@ -133,7 +133,7 @@
       <details>
         <summary>Methods, validation & coefficients (transparency)</summary>
         <div class="meth">
-          <p>Each tool below is a transparent re-implementation of a published equation. The Node harness includes source-paper worked examples, live-tool checks where available, and regression guards (30/30 checks pass; see <code>test_models.js</code>). Coefficients are fully open in <code>models.js</code>. The Steno-IHD/stroke endpoint is included for transparency but remains flagged as pending external/live-tool validation. This is an <b>agreement/decision-support tool, not an accuracy claim</b>: it shows how published tools differ on the same patient; it does not establish which is correct (that needs outcome data).</p>
+          <p>Each tool below is a transparent re-implementation of a published equation. The Node harness includes source-paper worked examples, live-tool checks where available, and regression guards (36/36 checks pass; see <code>test_models.js</code>). Coefficients are fully open in <code>models.js</code>. The Steno-IHD/stroke endpoint is included for transparency but remains flagged as pending external/live-tool validation. This is an <b>agreement/decision-support tool, not an accuracy claim</b>: it shows how published tools differ on the same patient; it does not establish which is correct (that needs outcome data).</p>
           <table id="methtable"></table>
           <p style="margin-top:10px"><b>Recalibration.</b> The SCORE2 family is recalibrated by risk region (a published mechanism). For the T1D-specific tools, the optional observed/expected ratio applies a transparent cumulative-hazard scaling — set it from your local registry's O/E (e.g. ~0.55 reproduces the Italian Steno over-estimation). Default 1.0 = published calibration.</p>
           <p><b>Reproducibility note.</b> The Scottish–Swedish tool here uses the published <i>final-model</i> coefficients (incl. the age-at-entry term omitted from the supplementary table) with a calibration constant (×1.32) fit to the authors' deployed app, because the published cubic/interaction coefficients are rounded to three decimals. Deprivation is fixed at quintile 3.</p>

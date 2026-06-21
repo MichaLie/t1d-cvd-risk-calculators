@@ -45,10 +45,10 @@ mistaken for a T1D-native estimate.
 ## Validation
 
 ```bash
-node test_models.js     # 30/30 pass
+node test_models.js     # 36/36 pass
 ```
 
-The 30 checks cover source-paper worked examples, live-tool comparisons where available,
+The 36 checks cover source-paper worked examples, live-tool comparisons where available,
 and regression guards. Most implemented tools reproduce their reference cases to the
 expected tolerance. The Steno-IHD/stroke endpoint is intentionally flagged
 `validated: false` in `models.js`: it is a secondary endpoint from the Steno paper and is

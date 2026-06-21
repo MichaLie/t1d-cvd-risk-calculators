@@ -26,6 +26,10 @@ check("SCORE2-D moderate man B", M.score2diabetes(sdB(false, "moderate")), 17.2)
 check("SCORE2-D moderate woman A", M.score2diabetes(sdA(true, "moderate")), 7.6);
 check("SCORE2-D low man A", M.score2diabetes(sdA(false, "low")), 8.4);
 check("SCORE2-D very-high woman B", M.score2diabetes(sdB(true, "very_high")), 34.0, 0.8);
+check("SCORE2-D age 39 is n/a", Number.isNaN(M.score2diabetes(Object.assign(sdA(false, "moderate"), { age: 39 }))) ? 1 : 0, 1, 0);
+check("SCORE2-D age 40 is applicable", Number.isFinite(M.score2diabetes(Object.assign(sdA(false, "moderate"), { age: 40 }))) ? 1 : 0, 1, 0);
+check("SCORE2-D age 79 is applicable", Number.isFinite(M.score2diabetes(Object.assign(sdA(false, "moderate"), { age: 79 }))) ? 1 : 0, 1, 0);
+check("SCORE2-D age 80 is n/a", Number.isNaN(M.score2diabetes(Object.assign(sdA(false, "moderate"), { age: 80 }))) ? 1 : 0, 1, 0);
 
 // --- SCORE2 (EHJ 2021 example, non-diabetic) ---
 const s2 = (fem, region) => ({ age: 50, female: fem, smoker: true, sbp: 140, total_chol: 5.5, hdl: 1.3, risk_region: region, diabetes: false });
@@ -85,6 +89,9 @@ const ssRet = Object.assign({ age: 60 }, ssBase);
 const ssNoRet = M.scottishSwedish(ssRet, 10);
 const ssRefRet = M.scottishSwedish(Object.assign({}, ssRet, { retinopathy: "ref" }), 10);
 check("Scottish-Swedish retinopathy raises risk", ssRefRet > ssNoRet + 1e-6 ? 1 : 0, 1, 0);
+check("Scottish-Swedish height cm normalised", M.scottishSwedish(Object.assign({}, ssRet, { height_m: 170 }), 10), M.scottishSwedish(Object.assign({}, ssRet, { height_m: 1.70 }), 10), 1e-12);
+const ssBmiHeight = { age: 45, female: false, duration: 30, hba1c_pct: 8.0, sbp: 130, tc_hdl_ratio: 4.8 / 1.4, egfr: 95, bmi: 25, albuminuria: "normal", smoker: false, on_bp_treatment: false, on_statin: false, af: false };
+check("Scottish-Swedish BMI-derived height cm normalised", M.scottishSwedish(Object.assign({}, ssBmiHeight, { height_m: 170 }), 10), M.scottishSwedish(Object.assign({}, ssBmiHeight, { height_m: 1.70 }), 10), 1e-12);
 
 console.log(`\n${pass} passed, ${fail} failed.`);
 process.exit(fail ? 1 : 0);

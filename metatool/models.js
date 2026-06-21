@@ -64,6 +64,7 @@
       legfr: -0.0640, legfr2: 0.0062, a1c_age: -0.0196, legfr_age: 0.0169 },
   };
   function score2diabetes(p) {
+    if (p.age < 40 || p.age >= 80) return NaN;
     const sex = p.female ? "female" : "male", b = S2D[sex];
     const cage = (p.age - 60) / 5, csbp = (p.sbp - 120) / 20, ctc = p.total_chol - 6, chdl = (p.hdl - 1.3) / 0.5;
     const cdx = (p.onset_age - 50) / 5, ca1c = (hba1cPctToMmol(p.hba1c_pct) - 31) / 9.34, legfr = (log(p.egfr) - 4.5) / 0.15;
@@ -250,7 +251,7 @@
   const SS_HEIGHT = { male: 1.75, female: 1.62 };
   const SS_CAL = 1.32; // calibration constant fit to the deployed Shiny tool (publication rounds cubic/interaction coeffs to 3 d.p.)
   function scottishSwedish(p, years) {
-    const sex = p.female ? "female" : "male", h = p.height_m || SS_HEIGHT[sex], weight = p.weight_kg || p.bmi * h * h;
+    const sex = p.female ? "female" : "male", rawHeight = p.height_m || SS_HEIGHT[sex], h = rawHeight > 3 ? rawHeight / 100 : rawHeight, weight = p.weight_kg || p.bmi * h * h;
     const a1cMmol = hba1cPctToMmol(p.hba1c_pct), meanA1c = a1cMmol;
     const dq = p.deprivation_quintile || 3;
     let fixed = SS.intercept + SS.age_entry * p.age + SS.female * (p.female ? 1 : 0) + SS.duration * p.duration
@@ -278,7 +279,7 @@
     "Steno-IHD/stroke": { category: "T1D", horizon: "10y", validated: false, fn: (p) => steno(p, 10, "ihd_stroke"), note: "Secondary IHD-or-stroke endpoint from the Steno paper's secondary analysis; not exposed by the public web tool, coefficients not yet re-verified against the supplement." },
     "Scottish-Swedish": { category: "T1D", horizon: "10y", validated: true, fn: (p) => scottishSwedish(p, 10), note: "Final-model coefficients incl. age-at-entry; calibrated to the deployed tool (×1.32). Deprivation set to quintile 3." },
     "Cederholm (5y)":   { category: "T1D", horizon: "5y",  validated: true, fn: (p) => cederholm(p), note: "5-year horizon (not 10y) — not directly comparable; shown for completeness." },
-    "SCORE2-Diabetes":  { category: "T2D", horizon: "10y", validated: true, fn: (p) => score2diabetes(p), note: "Derived in type-2 diabetes; not validated in T1D." },
+    "SCORE2-Diabetes":  { category: "T2D", horizon: "10y", validated: true, fn: (p) => score2diabetes(p), note: "Derived in type-2 diabetes; not validated in T1D; valid age 40–79." },
     "SCORE2":           { category: "general", horizon: "10y", validated: true, fn: (p) => score2(p), note: "General population; SCORE2 has NO diabetes term (use SCORE2-Diabetes for that); valid age 40–69." },
     "QRISK3":           { category: "general", horizon: "10y", validated: true, fn: (p) => qrisk3(p), note: "Has a dedicated T1D term; UK-calibrated; valid age 25–84." },
     "PCE (ACC/AHA)":    { category: "general", horizon: "10y", validated: true, fn: (p) => pce(p), note: "Hard ASCVD; diabetes as binary (no T1D/T2D); valid age 40–79." },

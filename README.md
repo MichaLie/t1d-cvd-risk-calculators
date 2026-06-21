@@ -45,7 +45,7 @@ python -m eval.fig_flowchart        # decision flowchart
 
 # the meta-calculator (no install, no server required)
 open metatool/index.html            # or: python3 -m http.server -d metatool
-node metatool/test_models.js        # validation: 30/30 should pass
+node metatool/test_models.js        # validation: 36/36 should pass
 ```
 
 The synthetic cohort is generated with a fixed seed (`20260613`), so every reported number is
