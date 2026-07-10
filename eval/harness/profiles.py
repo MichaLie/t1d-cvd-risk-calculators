@@ -7,15 +7,15 @@ Two products, serving two purposes:
                              for the divergence heat-grid and one-at-a-time
                              sensitivity (shows WHERE models diverge).
 
-  make_synthetic_cohort() -> n patients sampled from registry-anchored marginal
-                             distributions with light, defensible correlations,
+  make_synthetic_cohort() -> n illustrative profiles sampled from specified
+                             marginal distributions with imposed dependencies,
                              for the headline agreement statistics (Cohen's
-                             kappa, Bland-Altman) over a realistic case-mix.
+                             kappa, Bland-Altman) in a transparent case-mix.
 
-Distributions are anchored to contemporary adult T1D registry/cohort summaries
-(Steno derivation cohort; Scottish-Swedish / Swedish NDR). Every assumption is
-explicit here so it can be inspected, reproduced, and challenged.
-All randomness is seeded for exact reproducibility.
+This is an assumption-based generator, not a sampled or fitted registry
+population. Every assumption is explicit here so it can be inspected,
+reproduced, and challenged. All randomness is seeded; results are deterministic
+at the reported precision in a compatible Python/NumPy environment.
 """
 from __future__ import annotations
 from typing import Iterator, List

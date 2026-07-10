@@ -1,4 +1,4 @@
-"""End-to-end pipeline smoke test: cohort -> model -> categories -> discordance."""
+"""End-to-end pipeline smoke test: cohort -> model -> analytic bands -> discordance."""
 import numpy as np
 from eval.harness.profiles import make_synthetic_cohort, make_factorial
 from eval.harness.models import REGISTRY
@@ -14,7 +14,7 @@ cat_ihd = [band(x) for x in ihd]
 
 print("=== pipeline smoke test (Steno composite-CVD vs IHD/stroke, n=5000) ===")
 print(f"mean 10-yr risk   CVD={cvd.mean():.1f}%   IHD/stroke={ihd.mean():.1f}%")
-print(f"category mix CVD  : low/mod/high = "
+print(f"analytic-band counts CVD (<10/10-<20/>=20) = "
       f"{sum(c==0 for c in cat_cvd)}/{sum(c==1 for c in cat_cvd)}/{sum(c==2 for c in cat_cvd)}")
 print(f"kappa (unweighted): {cohen_kappa(cat_cvd, cat_ihd, None, k=3):.3f}")
 print(f"kappa (linear)    : {cohen_kappa(cat_cvd, cat_ihd, 'linear', k=3):.3f}")

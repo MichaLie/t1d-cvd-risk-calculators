@@ -15,7 +15,8 @@ if __package__ in (None, ""):
 from eval.harness.profiles import make_synthetic_cohort
 from eval.harness.models import REGISTRY, analysis_models
 
-OUT = Path(os.environ.get("FIG_OUT_DIR", "eval/out"))
+DEFAULT_OUT = Path(__file__).resolve().parent / "out"
+OUT = Path(os.environ.get("FIG_OUT_DIR", str(DEFAULT_OUT)))
 T1D_C = "#2166ac"; T2D_C = "#b2182b"; GEN_C = "#7f7f7f"
 CTYPE = {"T1D": T1D_C, "T2D": T2D_C, "general": GEN_C}
 
@@ -31,29 +32,28 @@ def bubble_size(n):
 
 # ---------------------------------------------------------------- Figure: predictor heat-grid
 def predictor_grid():
-    preds = ["Age", "Sex", "Diabetes duration", "Age at onset/dx", "HbA1c",
-             "Mean/long-term HbA1c", "Systolic BP", "Lipids (TC/HDL/LDL)", "eGFR",
-             "Albuminuria", "Retinopathy", "Smoking", "BMI/anthropometry",
-             "Treated hypertension", "Lipid-lowering Rx", "Atrial fibrillation",
-             "Prior CVD", "Deprivation", "Ethnicity", "Exercise"]
-    # 1 = predictor used by the model
+    # Compact domains keep the figure legible at a journal's full-page width.
+    # A value of 1 means that at least one predictor in the domain is used.
+    preds = ["Current age / sex", "Blood pressure", "Lipids", "Smoking",
+             "Duration / onset", "HbA1c", "Renal", "Retinopathy",
+             "BP / lipid treatment", "Other"]
     models = {
         # T1D-specific
-        "Cederholm 2011 (T1D)":      "Age?,_,1,1,1,_,1,1,_,1,_,1,_,_,_,_,1,_,_,_",
-        "Steno 2016 (T1D)":          "1,1,1,_,1,_,1,1,1,1,_,1,_,_,_,_,_,_,_,1",
-        "EURODIAB 2014 (T1D)":       "1,_,_,_,1,_,_,1,_,1,_,_,1,_,_,_,_,_,_,_",
-        "Scottish–Swedish 2021 (T1D)":"1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,_,1,_,_",
-        "LIFE-T1D 2024 (T1D)":       "_,1,_,1,_,_,1,1,1,1,1,1,1,_,_,_,_,_,_,_",
+        "Cederholm 2011 (T1D)":       "_,1,1,1,1,1,1,_,_,1",
+        "Steno 2016 (T1D)":           "1,1,1,1,1,1,1,_,_,1",
+        "EURODIAB 2014 (T1D)":        "1,_,1,_,_,1,1,_,_,1",
+        "Scottish–Swedish 2021 (T1D)":"1,1,1,1,1,1,1,1,1,1",
+        "LIFE-T1D 2024 (T1D)":        "1,1,1,1,1,1,1,1,_,1",
         # candidate T2D / general
-        "SCORE2-Diabetes 2023 (T2D)":"1,1,_,1,1,_,1,1,1,_,_,1,_,_,_,_,_,_,_,_",
-        "DIAL 2019 (T2D)":           "1,1,1,_,1,_,1,1,1,1,_,1,1,_,_,_,1,_,_,_",
-        "ADVANCE 2011 (T2D)":        "_,1,1,1,1,_,1,1,_,1,1,_,_,1,_,1,_,_,_,_",
-        "UKPDS (T2D)":               "1,1,1,_,1,_,1,1,_,_,_,1,_,_,_,1,_,_,1,_",
-        "SCORE2 2021 (gen.)":        "1,1,_,_,_,_,1,1,_,_,_,1,_,_,_,_,_,_,_,_",
-        "PCE 2013 (gen.)":           "1,1,_,_,_,_,1,1,_,_,_,1,_,1,_,_,_,_,1,_",
-        "PREVENT 2024 (gen.)":       "1,1,_,_,_,_,1,1,1,_,_,1,1,1,1,_,_,_,_,_",
-        "QRISK3 2017 (gen.)":        "1,1,_,_,_,_,1,1,1,_,_,1,1,1,_,1,_,1,1,_",
-        "Framingham 2008 (gen.)":    "1,1,_,_,_,_,1,1,_,_,_,1,_,_,_,_,_,_,_,_",
+        "SCORE2-Diabetes 2023 (T2D)":"1,1,1,1,1,1,1,_,_,_",
+        "DIAL 2019 (T2D)":           "1,1,1,1,1,1,1,_,_,1",
+        "ADVANCE 2011 (T2D)":        "1,1,1,_,1,1,1,1,1,1",
+        "UKPDS (T2D)":               "1,1,1,1,1,1,_,_,_,1",
+        "SCORE2 2021 (gen.)":        "1,1,1,1,_,_,_,_,_,_",
+        "PCE 2013 (gen.)":           "1,1,1,1,_,_,_,_,1,1",
+        "PREVENT base 2024 (gen.)":  "1,1,1,1,_,_,1,_,1,_",
+        "QRISK3 2017 (gen.)":        "1,1,1,1,_,_,1,_,1,1",
+        "Framingham 2008 (gen.)":    "1,1,1,1,_,_,_,_,1,_",
     }
     names = list(models)
     tokens = [[x.strip() for x in v.split(",")] for v in models.values()]
@@ -80,25 +80,23 @@ def predictor_grid():
 
     group_bracket(0, 4, "T1D-specific", T1D_C)
     group_bracket(5, len(names) - 1, "candidate T2D / general", T2D_C)
-    for i, j in np.argwhere(M == 0.5):
-        ax.text(j, i, "?", ha="center", va="center", fontsize=9, fontweight="bold", color="#1f1f1f")
     ax.set_title("Predictors used by each cardiovascular risk calculator", fontsize=12, pad=10)
-    fig.text(0.5, 0.005, "Filled = predictor used; ? = uncertain/ambiguous encoding in the source description. T1D-specific tools capture renal (eGFR, albuminuria), retinopathy and duration/onset; "
-             "generic tools rely on conventional factors only.", ha="center", fontsize=7.5, style="italic")
+    fig.text(0.5, 0.005, "Filled = at least one predictor in the domain. Other includes BMI, AF, prior CVD, deprivation, ethnicity, or exercise; diabetes status/type is not shown as a separate domain. "
+             "Cederholm has no explicit current-age/sex term (age is used to derive onset age). None uses CGM time in range, hypoglycaemia exposure, autonomic neuropathy, or insulin-delivery modality.", ha="center", fontsize=7.2, style="italic")
     fig.tight_layout(rect=[0.03, 0.03, 1, 1])
     save_figure(fig, "fig_predictor_grid.png")
 
 # ---------------------------------------------------------------- Figure: model timeline
 def timeline():
     # (name, year, cohort_n, type, horizon)
-    M = [("Pittsburgh EDC", 2006, 600, "T1D", "10y"), ("Cederholm NDR", 2011, 3661, "T1D", "5y"),
-         ("EURODIAB", 2014, 2329, "T1D", "7y"), ("Steno T1", 2016, 4306, "T1D", "5/10y"),
-         ("Scottish–Swedish", 2021, 27527, "T1D", "10y"), ("LIFE-T1D", 2024, 30000, "T1D", "10y/life"),
+    M = [("Pittsburgh EDC", 2010, 603, "T1D", "10y"), ("Cederholm NDR", 2011, 3661, "T1D", "5y"),
+         ("EURODIAB", 2014, 1973, "T1D", "7y"), ("Steno T1", 2016, 4306, "T1D", "5/10y"),
+         ("Scottish–Swedish", 2021, 27527, "T1D", "10y"), ("LIFE-T1D", 2024, 39756, "T1D", "10y/life"),
          ("UKPDS", 2001, 4540, "T2D", "—"), ("ADVANCE", 2011, 7168, "T2D", "4y"),
          ("DIAL", 2019, 389366, "T2D", "10y/life"), ("SCORE2-Diabetes", 2023, 229460, "T2D", "10y"),
          ("Framingham gen.", 2008, 8491, "general", "10y"), ("PCE", 2013, 24626, "general", "10y"),
          ("QRISK3", 2017, 7800000, "general", "10y"), ("SCORE2", 2021, 677684, "general", "10y"),
-         ("PREVENT", 2024, 6612004, "general", "10/30y")]
+         ("PREVENT", 2024, 3281919, "general", "10/30y")]
     fig, ax = plt.subplots(figsize=(12, 5.5))
     lanes = {"T1D": 2, "T2D": 1, "general": 0}
     label_layout = {
@@ -143,21 +141,28 @@ def timeline():
 
 # ---------------------------------------------------------------- Figure: C-statistic forest plot
 def cstat_forest():
-    # (model, C_point, lo, hi, type) — compiled from primary papers + Erqou 2025 meta-analysis (approximate)
-    rows = [("Cederholm 2011", 0.815, 0.80, 0.83, "T1D"), ("Steno 2016", 0.815, 0.80, 0.83, "T1D"),
-            ("Pittsburgh EDC", 0.785, 0.77, 0.80, "T1D"), ("EURODIAB 2014", 0.775, 0.77, 0.78, "T1D"),
-            ("Scottish–Swedish 2021", 0.835, 0.82, 0.85, "T1D"), ("LIFE-T1D 2024", 0.77, 0.73, 0.85, "T1D"),
-            ("Pooled T1D-specific (Erqou)", 0.81, 0.78, 0.84, "T1D"),
-            ("SCORE2 in T1D", 0.74, 0.67, 0.81, "general"), ("PCE in T1D", 0.755, 0.73, 0.78, "general"),
-            ("QRISK3 in T1D", 0.755, 0.73, 0.78, "general"), ("UKPDS in T1D", 0.72, 0.68, 0.76, "T2D"),
-            ("Pooled general/T2D (Erqou)", 0.75, 0.72, 0.78, "general")]
+    # Horizontal spans are reported derivation/validation or sex-specific
+    # values, not confidence intervals. Pooled rows are point estimates.
+    rows = [("Cederholm 2011", 0.815, 0.80, 0.83, "T1D"),
+            ("Steno 2016 (5-year)", 0.815, 0.803, 0.826, "T1D"),
+            ("Pittsburgh EDC 2010", 0.775, 0.77, 0.78, "T1D"),
+            ("EURODIAB 2014", 0.775, 0.73, 0.82, "T1D"),
+            ("Scottish–Swedish 2021", 0.835, 0.82, 0.85, "T1D"),
+            ("LIFE-T1D 2024", 0.79, 0.73, 0.85, "T1D"),
+            ("Pooled T1D-specific (Erqou)", 0.81, 0.81, 0.81, "T1D"),
+            ("QRISK3 external T1D validation", 0.842, 0.830, 0.853, "general"),
+            ("Pooled general/T2D (Erqou)", 0.75, 0.75, 0.75, "general")]
     fig, ax = plt.subplots(figsize=(8.8, 6))
     ys = list(range(len(rows))[::-1])
     for y, (name, c, lo, hi, typ) in zip(ys, rows):
         pooled = "Pooled" in name
         ax.plot([lo, hi], [y, y], color=CTYPE[typ], lw=2.2 if pooled else 1.4, alpha=0.9)
-        ax.scatter(c, y, marker="D" if pooled else "o", s=90 if pooled else 55, color=CTYPE[typ],
-                   edgecolor="black", zorder=3, linewidth=0.6)
+        if pooled:
+            ax.scatter(c, y, marker="D", s=90, color=CTYPE[typ],
+                       edgecolor="black", zorder=3, linewidth=0.6)
+        else:
+            ax.plot([lo, lo], [y - 0.05, y + 0.05], color=CTYPE[typ], lw=1.2)
+            ax.plot([hi, hi], [y - 0.05, y + 0.05], color=CTYPE[typ], lw=1.2)
     ax.axvline(0.81, color=T1D_C, ls="--", lw=0.8, alpha=0.6); ax.axvline(0.75, color=GEN_C, ls="--", lw=0.8, alpha=0.6)
     ax.set_xlim(0.65, 0.90)
     ax.set_ylim(-0.75, len(rows) - 0.25)
@@ -167,11 +172,11 @@ def cstat_forest():
             tick.set_fontweight("bold")
     ax.tick_params(axis="y", length=0, pad=6)
     ax.set_xlabel("C-statistic (discrimination) in type 1 diabetes", fontsize=10)
-    ax.set_title("Discrimination of CV risk models in type 1 diabetes\n(T1D-specific vs general/T2D; pooled estimates from Erqou 2025)", fontsize=11.5)
+    ax.set_title("Reported discrimination of cardiovascular risk models in type 1 diabetes", fontsize=11.5)
     ax.legend(handles=[Patch(color=T1D_C, label="T1D-specific"), Patch(color=T2D_C, label="T2D"),
                        Patch(color=GEN_C, label="General")], loc="lower right", fontsize=8.5, frameon=False)
     for sp in ["top", "right", "left"]: ax.spines[sp].set_visible(False)
-    fig.text(0.5, 0.005, "Values compiled from primary derivation/validation papers and the Erqou 2025 meta-analysis; ranges approximate.",
+    fig.text(0.5, 0.005, "Horizontal spans show reported derivation/validation or sex-specific C-statistics, not confidence intervals; pooled diamonds show point estimates. QRISK3: Livingstone 2021.",
              ha="center", fontsize=7, style="italic")
     fig.tight_layout(rect=[0, 0.02, 1, 1])
     save_figure(fig, "fig_cstat_forest.png")
@@ -188,7 +193,7 @@ def risk_distributions():
         if m == "UKPDS-CVD":
             ukpds_stats = (float(np.median(r)), float(np.mean(r)))
             continue
-        data.append(r); colors.append(CTYPE[REGISTRY[m][0]]); labels.append(m)
+        data.append(r); colors.append(CTYPE[REGISTRY[m][0]]); labels.append(f"{m} (n={len(r):,})")
     order = np.argsort([np.median(d) for d in data])
     data = [data[i] for i in order]; colors = [colors[i] for i in order]; labels = [labels[i] for i in order]
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -196,12 +201,12 @@ def risk_distributions():
     for patch, c in zip(bp["boxes"], colors): patch.set_facecolor(c); patch.set_alpha(0.7)
     for med in bp["medians"]: med.set_color("black")
     ax.set_yticklabels(labels, fontsize=9)
-    threshold_specs = [(10, "10% threshold", "green", "--"), (20, "20% threshold", "orange", "-.")]
+    threshold_specs = [(10, "10% analytic boundary", "green", "--"), (20, "20% analytic boundary", "orange", "-.")]
     for x, label, color, ls in threshold_specs:
         ax.axvline(x, color=color, ls=ls, lw=1.0, alpha=0.75)
         ax.text(x + 1.0, len(data) + 0.45, label, color=color, fontsize=8, va="center", ha="left")
-    ax.set_xlabel("Predicted 10-year CVD risk (%) on the same synthetic T1D cohort", fontsize=10)
-    ax.set_title("Same patients, different answers: predicted-risk distributions by calculator\n(main axis excludes the structurally implausible UKPDS outlier)", fontsize=11.5)
+    ax.set_xlabel("Predicted 10-year risk (%) among profiles eligible for each model", fontsize=10)
+    ax.set_title("Predicted-risk distributions in the seeded synthetic cohort\n(main axis excludes the structurally implausible UKPDS outlier)", fontsize=11.5)
     if ukpds_stats:
         ax.text(0.995, 0.08,
                 f"UKPDS-CVD treated as outlier: median {ukpds_stats[0]:.0f}%, mean {ukpds_stats[1]:.0f}%\n"
@@ -214,7 +219,9 @@ def risk_distributions():
     for sp in ["top", "right"]: ax.spines[sp].set_visible(False)
     ax.set_xlim(0, 40)
     ax.set_ylim(0.5, len(data) + 0.7)
-    fig.tight_layout(rect=[0, 0.05, 1, 1])
+    fig.text(0.5, 0.005, "Rows use model-specific eligible subsets and tool-specific endpoints; risk percentages are therefore not directly interchangeable.",
+             ha="center", fontsize=7.2, style="italic")
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
     save_figure(fig, "fig_risk_distributions.png")
 
 

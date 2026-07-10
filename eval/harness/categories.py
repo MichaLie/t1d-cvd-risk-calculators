@@ -1,32 +1,39 @@
-"""
-Risk-category banding for cross-model agreement.
+"""Common analytic banding for cross-model agreement.
 
-Different guidelines use different thresholds. For the headline cross-model
-agreement we band the harmonised 10-year CVD risk with the widely used,
-treatment-decision-relevant NICE/Steno bands (the Steno engine itself reports
-these): low <10%, moderate 10-20%, high >=20%. ESC SCORE2 age-dependent bands
-are provided as a sensitivity alternative.
+The compared calculators use different endpoints, horizons, eligibility rules,
+and native decision thresholds. For the exploratory agreement analysis, their
+10-year outputs are mapped to common bands (<10%, 10 to <20%, and >=20%) only
+to summarise ordinal concordance. These are not universal treatment thresholds.
 
-Banding returns an ordinal integer 0..K-1 so Cohen's kappa (incl. ordinal
+Banding returns an ordinal integer 0..K-1 so Cohen's kappa (including ordinal
 weighting) can be computed directly.
 """
 from __future__ import annotations
 
-# primary common banding (10-year CVD)
-NICE_STENO_BANDS = [(10.0, "low"), (20.0, "moderate"), (float("inf"), "high")]
-NICE_STENO_LABELS = ["low", "moderate", "high"]
+from math import isfinite
+
+# Primary common analytic banding for the 10-year agreement matrix.
+COMMON_ANALYTIC_BANDS = [
+    (10.0, "<10%"),
+    (20.0, "10 to <20%"),
+    (float("inf"), ">=20%"),
+]
+COMMON_ANALYTIC_LABELS = ["<10%", "10 to <20%", ">=20%"]
 
 
-def band(risk_pct: float, bands=NICE_STENO_BANDS) -> int:
-    """Return ordinal index of the band containing risk_pct (in %)."""
+def band(risk_pct: float, bands=COMMON_ANALYTIC_BANDS) -> int:
+    """Return the ordinal band index, or -1 for a non-finite risk."""
+    if not isfinite(risk_pct):
+        return -1
     for i, (upper, _label) in enumerate(bands):
         if risk_pct < upper:
             return i
     return len(bands) - 1
 
 
-def band_label(risk_pct: float, bands=NICE_STENO_BANDS) -> str:
-    return bands[band(risk_pct, bands)][1]
+def band_label(risk_pct: float, bands=COMMON_ANALYTIC_BANDS) -> str:
+    index = band(risk_pct, bands)
+    return "not available" if index < 0 else bands[index][1]
 
 
 def score2_band(risk_pct: float, age: float) -> int:

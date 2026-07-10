@@ -11,14 +11,15 @@ updated each year. Two coefficient variants:
   - 'alt'  : ESM Table 9, deprivation-free (recommended for non-Scottish/non-SIMD
              populations, e.g. a Czech T1D cohort) + Age*mean-HbA1c
 
-The 'main' variant is validated against the authors' live Shiny calculator
-(diabepi.shinyapps.io/cvdrisk).
+The 'main' implementation was checked against selected outputs from the authors'
+live Shiny calculator (diabepi.shinyapps.io/cvdrisk). This is an implementation
+check, not external clinical validation.
 """
 from __future__ import annotations
 from math import exp, log
 
-# Final model (paper Table 2, IRRs -> beta=ln(IRR)). Includes BOTH age-at-entry
-# (the deployed-model term the supplementary Table 4 omitted) and the Age*mean-HbA1c
+# Final model (published coefficient table, Table 4; IRRs -> beta=ln(IRR)).
+# Includes BOTH age-at-entry (the deployed-model term omitted from Table 4) and the Age*mean-HbA1c
 # interaction. NB: the cubic-age and interaction IRRs are published only to 3 d.p.,
 # so those betas (age2/age3/age_weight/age_mean_hba1c) cannot be recovered to full
 # precision from the paper -> residual mismatch vs the deployed app is expected.
@@ -85,7 +86,7 @@ def scottish_swedish_risk(*, female: bool, age: float, duration: float, hba1c_mm
 
 
 if __name__ == "__main__":
-    # Validate MAIN variant against the authors' live Shiny app default profile -> 5%
+    # Check the MAIN variant against the authors' live Shiny app default profile -> 5%.
     g = scottish_swedish_risk(female=True, age=42, duration=5, hba1c_mmol=74, mean_hba1c_mmol=74,
                               sbp=128, tc_hdl_ratio=3.3, egfr=97, bmi=26, height_m=1.71, weight_kg=77,
                               albuminuria="normal", retinopathy="none", smoker=False,

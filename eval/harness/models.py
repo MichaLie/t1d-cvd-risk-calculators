@@ -4,8 +4,7 @@ Model registry: maps a calculator name -> callable(Patient, years) -> risk in %.
 Each adapter translates the unified Patient into the inputs that model needs and
 returns absolute risk as a PERCENT (0-100). The registry inclusion flag means an
 endpoint is included in the in-silico agreement analysis; endpoint-specific
-implementation and validation caveats are documented in the repository and
-meta-tool rather than collapsed into a single "validated" label.
+implementation checks and clinical-validity caveats are documented separately.
 """
 from __future__ import annotations
 from ..models.steno_t1 import StenoPatient, steno_risk
@@ -65,7 +64,8 @@ def _qrisk3(p) -> float:
 
 
 def _scotswed(p) -> float:
-    # Final-model (Table 2) coefficients incl. age-at-entry; deprivation set to a
+    # Final-model coefficients from the published coefficient table (Table 4),
+    # with the omitted age-at-entry term restored; deprivation is set to a
     # representative middle quintile (3) for a non-SIMD cohort; cal=1.32 absorbs the
     # publication-rounding level offset, fit to the deployed Shiny calculator.
     retinopathy = "nonref" if p.retinopathy else "none"

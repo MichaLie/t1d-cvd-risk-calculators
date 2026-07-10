@@ -7,7 +7,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
-OUT = Path(os.environ.get("FIG_OUT_DIR", "eval/out"))
+DEFAULT_OUT = Path(__file__).resolve().parent / "out"
+OUT = Path(os.environ.get("FIG_OUT_DIR", str(DEFAULT_OUT)))
 
 def save_figure(fig, filename):
     OUT.mkdir(parents=True, exist_ok=True)
@@ -16,7 +17,7 @@ def save_figure(fig, filename):
     plt.close(fig)
     print(f"saved {path}")
 
-K = pd.read_csv("eval/out/kappa_matrix.csv", index_col=0)
+K = pd.read_csv(DEFAULT_OUT / "kappa_matrix.csv", index_col=0)
 labels = list(K.columns)
 M = K.values
 
@@ -34,13 +35,13 @@ for i in range(len(labels)):
                 color="white" if (v < 0.25 or v > 0.85) else "black",
                 fontweight="bold" if i != j else "normal")
 cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-cbar.set_label("Cohen's κ (linear-weighted)\nrisk-category agreement", fontsize=9)
-ax.set_title("Cross-calculator agreement on 10-yr CVD risk category\n"
-             "synthetic T1D cohort (n=10,000), pairwise-complete",
+cbar.set_label("Cohen's κ (linear-weighted)\nagreement across common analytic bands", fontsize=9)
+ax.set_title("Cross-calculator agreement across common 10-year risk bands\n"
+             "synthetic T1D cohort (n=10,000), pairwise-complete; tool-specific endpoints",
              fontsize=11, pad=12)
 off = M[~np.eye(len(labels), dtype=bool)]
-ax.text(0.5, -0.32, f"mean off-diagonal κ = {off.mean():.2f}  "
-        f"(range {off.min():.2f}–{off.max():.2f})  |  κ<0.4 = poor, 0.4–0.6 moderate, 0.6–0.8 substantial",
+ax.text(0.5, -0.32, f"unweighted mean off-diagonal κ = {off.mean():.2f}  "
+        f"(range {off.min():.2f}–{off.max():.2f}); bands: <10%, 10 to <20%, and ≥20%",
         transform=ax.transAxes, ha="center", fontsize=8, style="italic")
 plt.tight_layout()
 save_figure(fig, "kappa_heatmap.png")

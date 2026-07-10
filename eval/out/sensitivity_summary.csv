@@ -1,0 +1,6 @@
+scenario,definition,n_profiles,mean_pairwise_linear_weighted_kappa,n_model_pairs_estimable,minimum_pairwise_n,steno_cvd_vs_scottish_swedish_kappa,steno_cvd_vs_scottish_swedish_n,steno_cvd_vs_scottish_swedish_exact_agreement_percent,steno_ihdstroke_vs_score2_diabetes_kappa,steno_ihdstroke_vs_score2_diabetes_n,steno_ihdstroke_vs_score2_diabetes_exact_agreement_percent
+Full seeded cohort,"All 10,000 profiles generated with seed 20260613.",10000,0.3897664528083592,55,5905,0.8279734427611269,10000,84.67,0.7244771739693833,6309,76.09763829449993
+Young with early-onset T1D,Age <40 years and age at diagnosis <18 years.,1519,0.13510081809970148,28,816,0.5555134484296974,1519,92.23173140223831,,0,
+Renal-risk subgroup,Albuminuria above normal or eGFR <60 mL/min/1.73 m2.,2185,0.3399853963599787,55,1495,0.798322147191459,2185,84.62242562929062,0.7155290255953172,1683,78.90671420083186
+Favourable risk-factor subgroup,"HbA1c <7.5%, SBP <130 mmHg, LDL cholesterol <2.6 mmol/L, not currently smoking, and normal albuminuria.",583,0.39904351960902645,55,334,0.6764506382191527,583,81.47512864493997,0.7801772128409723,351,84.61538461538461
+Age 70 years or older,"Age >=70 years; coded age limits remain enforced, although some models still extrapolate beyond their derivation age range.",409,0.09205137613277281,42,195,0.0,409,98.0440097799511,0.0,333,98.49849849849849

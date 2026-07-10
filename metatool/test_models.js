@@ -1,4 +1,4 @@
-/* Validate models.js (JS engine) against each source paper's worked example / live tool. */
+/* Implementation checks against source-paper examples, tables, live tools and regression guards. */
 const M = require("./models.js");
 const mmol = M.hba1cMmolToPct;        // mmol/mol -> %
 const MGDL = 38.67, NONHDL = 0.02586;
@@ -10,10 +10,11 @@ function check(name, got, exp, tol) {
   ok ? pass++ : fail++;
 }
 
-// --- Steno (live-tool validated) ---
+// --- Steno (selected live-tool implementation checks) ---
 const stA = { age: 50, female: true, duration: 30, hba1c_pct: mmol(70), sbp: 130, ldl: 2.0, egfr: 100, albuminuria: "normal", smoker: false, regular_exercise: true };
 check("Steno CVD 5y (app default)", M.steno(stA, 5, "cvd"), 6.1);
 check("Steno CVD 10y (app default)", M.steno(stA, 10, "cvd"), 11.8);
+check("Steno IHD/stroke Table 4 regression", M.steno(stA, 10, "ihd_stroke"), 8.37492513748504, 1e-9);
 const stB = { age: 60, female: true, duration: 25, hba1c_pct: mmol(90), sbp: 150, ldl: 4.0, egfr: 70, albuminuria: "normal", smoker: false, regular_exercise: true };
 check("Steno CVD 5y (high profile)", M.steno(stB, 5, "cvd"), 16.4);
 check("Steno CVD 10y (high profile)", M.steno(stB, 10, "cvd"), 30.0, 1.0);
@@ -92,6 +93,12 @@ check("Scottish-Swedish retinopathy raises risk", ssRefRet > ssNoRet + 1e-6 ? 1 
 check("Scottish-Swedish height cm normalised", M.scottishSwedish(Object.assign({}, ssRet, { height_m: 170 }), 10), M.scottishSwedish(Object.assign({}, ssRet, { height_m: 1.70 }), 10), 1e-12);
 const ssBmiHeight = { age: 45, female: false, duration: 30, hba1c_pct: 8.0, sbp: 130, tc_hdl_ratio: 4.8 / 1.4, egfr: 95, bmi: 25, albuminuria: "normal", smoker: false, on_bp_treatment: false, on_statin: false, af: false };
 check("Scottish-Swedish BMI-derived height cm normalised", M.scottishSwedish(Object.assign({}, ssBmiHeight, { height_m: 170 }), 10), M.scottishSwedish(Object.assign({}, ssBmiHeight, { height_m: 1.70 }), 10), 1e-12);
+
+// Common analytic bands use exact half-open boundaries and reject non-finite input.
+check("Analytic band below 10%", M.band(9.999), 0, 0);
+check("Analytic band 10 to <20%", M.band(10), 1, 0);
+check("Analytic band >=20%", M.band(20), 2, 0);
+check("Analytic band rejects NaN", M.band(Number.NaN), -1, 0);
 
 console.log(`\n${pass} passed, ${fail} failed.`);
 process.exit(fail ? 1 : 0);

@@ -9,6 +9,8 @@ keeps the coefficient-publication caveat explicit in the repository output.
 NOT an accuracy study (no outcomes): this quantifies disagreement on identical
 synthetic T1D patients.
 """
+from pathlib import Path
+
 import numpy as np, pandas as pd
 from eval.harness.profiles import make_synthetic_cohort
 from eval.harness.models import REGISTRY, analysis_models
@@ -16,7 +18,9 @@ from eval.harness.categories import band
 from eval.harness.discordance import cohen_kappa, agreement_rate, bland_altman, risk_ratio_summary
 
 N = 10000
-cohort = make_synthetic_cohort(N)
+SEED = 20260613
+OUT = Path(__file__).resolve().parent / "out"
+cohort = make_synthetic_cohort(N, seed=SEED)
 ages = np.array([p.age for p in cohort])
 models = analysis_models()
 risk = {m: np.array([REGISTRY[m][2](p) for p in cohort], float) for m in models}
@@ -30,16 +34,17 @@ def both_finite(a, b, extra=None):
     return m
 
 
-print(f"=== In-silico discordance: synthetic T1D cohort n={N} (Czech/high region) ===")
+print(f"=== In-silico discordance: assumption-based synthetic T1D cohort n={N} ===")
+print("(SCORE2 family setting: high-risk region)")
 print(f"(implemented endpoints: {', '.join(models)})\n")
-hdr = f"{'model':16} {'category':9} {'coverage':>8} {'mean%':>7} {'median%':>8} {'low/mod/high':>16}"
+hdr = f"{'model':16} {'class':9} {'coverage':>8} {'mean%':>7} {'median%':>8} {'<10/10-<20/>=20':>17}"
 print(hdr); print("-" * len(hdr))
 for m in models:
     fin = np.isfinite(risk[m]); r = risk[m][fin]; c = cat[m][fin]
     print(f"{m:16} {REGISTRY[m][0]:9} {fin.mean()*100:7.0f}% {r.mean():7.1f} {np.median(r):8.1f} "
           f"{(c==0).sum():5d}/{(c==1).sum():4d}/{(c==2).sum():4d}")
 
-print("\n--- pairwise category agreement (Cohen's kappa, linear-weighted; pairwise-complete) ---")
+print("\n--- pairwise analytic-band agreement (Cohen's kappa, linear-weighted; pairwise-complete) ---")
 K = pd.DataFrame(np.eye(len(models)), index=models, columns=models)
 for i, a in enumerate(models):
     for b in models[i+1:]:
@@ -76,6 +81,9 @@ ss = np.array([REGISTRY["Scottish-Swedish"][2](p) for p in cohort], float)
 print(f"\n[IMPLEMENTATION CAVEAT] Scottish-Swedish mean={np.nanmean(ss):.1f}% median={np.nanmedian(ss):.1f}% "
       f"(final-model implementation; coefficient-publication caveat documented in repository)")
 
-out = pd.DataFrame({m: risk[m] for m in models}); out["age"] = ages
-out.to_csv("eval/out/cohort_risks.csv", index=False); K.to_csv("eval/out/kappa_matrix.csv")
-print("\nsaved -> eval/out/cohort_risks.csv, eval/out/kappa_matrix.csv")
+OUT.mkdir(parents=True, exist_ok=True)
+out = pd.DataFrame({"synthetic_id": np.arange(1, N + 1), **{m: risk[m] for m in models}})
+out["age"] = ages
+out.to_csv(OUT / "cohort_risks.csv", index=False)
+K.to_csv(OUT / "kappa_matrix.csv")
+print(f"\nsaved -> {OUT / 'cohort_risks.csv'}, {OUT / 'kappa_matrix.csv'}")

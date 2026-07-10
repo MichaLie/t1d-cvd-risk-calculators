@@ -7,7 +7,7 @@
  * in Node (for the test harness).
  *
  * IMPORTANT: this engine does not invent a new model. It reproduces published
- * calculator equations with endpoint-specific validation status so they can be
+ * calculator equations with endpoint-specific implementation-check status so they can be
  * run side by side, compared, and recalibrated transparently. It is an
  * agreement/decision-support tool, NOT a validated accuracy claim.
  *
@@ -272,26 +272,27 @@
   }
 
   // ----------------------------------------------------------------- model registry
-  // category: T1D | T2D | general ; validated: true = reference/live-tool
-  // implementation check, not external validation in a T1D outcomes cohort.
+  // category: T1D | T2D | general. implementationChecked means that selected
+  // reference, live-tool, or regression checks passed; it is not external
+  // clinical validation in a T1D outcomes cohort.
   const MODELS = {
-    "Steno-CVD":        { category: "T1D", horizon: "10y", validated: true, fn: (p) => steno(p, 10, "cvd"), note: "Composite incl. heart failure & PAD. Web-validated to the decimal." },
-    "Steno-IHD/stroke": { category: "T1D", horizon: "10y", validated: false, fn: (p) => steno(p, 10, "ihd_stroke"), note: "Secondary IHD-or-stroke endpoint from the Steno paper's secondary analysis; not exposed by the public web tool, coefficients not yet re-verified against the supplement." },
-    "Scottish-Swedish": { category: "T1D", horizon: "10y", validated: true, fn: (p) => scottishSwedish(p, 10), note: "Final-model coefficients incl. age-at-entry; calibrated to the deployed tool (×1.32). Deprivation set to quintile 3." },
-    "Cederholm (5y)":   { category: "T1D", horizon: "5y",  validated: true, fn: (p) => cederholm(p), note: "5-year horizon (not 10y) — not directly comparable; shown for completeness." },
-    "SCORE2-Diabetes":  { category: "T2D", horizon: "10y", validated: true, fn: (p) => score2diabetes(p), note: "Derived in type-2 diabetes; not validated in T1D; valid age 40–79." },
-    "SCORE2":           { category: "general", horizon: "10y", validated: true, fn: (p) => score2(p), note: "General population; SCORE2 has NO diabetes term (use SCORE2-Diabetes for that); valid age 40–69." },
-    "QRISK3":           { category: "general", horizon: "10y", validated: true, fn: (p) => qrisk3(p), note: "Has a dedicated T1D term; UK-calibrated; valid age 25–84." },
-    "PCE (ACC/AHA)":    { category: "general", horizon: "10y", validated: true, fn: (p) => pce(p), note: "Hard ASCVD; diabetes as binary (no T1D/T2D); valid age 40–79." },
-    "AHA PREVENT":      { category: "general", horizon: "10y", validated: true, fn: (p) => prevent(p), note: "Total CVD incl. heart failure; valid age 30–79." },
-    "Framingham":       { category: "general", horizon: "10y", validated: true, fn: (p) => framingham(p), note: "Broad CVD composite; valid age 30–74." },
-    "UKPDS":            { category: "T2D", horizon: "10y", validated: true, fn: (p) => ukpds(p), note: "T2D engine; duration term extrapolates pathologically to long T1D durations — interpret with caution." },
-    "ADVANCE*":         { category: "T2D", horizon: "10y*", validated: true, fn: (p) => advance(p, 10), note: "Native 4-year; 10-year is an extrapolation." },
+    "Steno-CVD":        { category: "T1D", horizon: "10y", implementationChecked: true, fn: (p) => steno(p, 10, "cvd"), note: "Composite incl. heart failure & PAD. Selected live-tool output reproduced to reported precision." },
+    "Steno-IHD/stroke": { category: "T1D", horizon: "10y", implementationChecked: true, fn: (p) => steno(p, 10, "ihd_stroke"), note: "Secondary IHD-or-stroke endpoint; coefficients source-checked against Vistisen 2016 Supplemental Table 4." },
+    "Scottish-Swedish": { category: "T1D", horizon: "10y", implementationChecked: true, fn: (p) => scottishSwedish(p, 10), note: "Final-model reconstruction incl. age-at-entry; fitted ×1.32 constant aligns selected deployed-tool output. Deprivation set to quintile 3." },
+    "Cederholm (5y)":   { category: "T1D", horizon: "5y",  implementationChecked: true, fn: (p) => cederholm(p), note: "Native 5-year endpoint; shown separately and excluded from the 10-year agreement matrix." },
+    "SCORE2-Diabetes":  { category: "T2D", horizon: "10y", implementationChecked: true, fn: (p) => score2diabetes(p), note: "Derived in type-2 diabetes; no T1D calibration study; coded age 40–79." },
+    "SCORE2":           { category: "general", horizon: "10y", implementationChecked: true, fn: (p) => score2(p), note: "General population; no diabetes term; coded age 40–69." },
+    "QRISK3":           { category: "general", horizon: "10y", implementationChecked: true, fn: (p) => qrisk3(p), note: "Dedicated T1D term; external T1D validation is population-specific; coded age 25–84." },
+    "PCE (ACC/AHA)":    { category: "general", horizon: "10y", implementationChecked: true, fn: (p) => pce(p), note: "Hard ASCVD; diabetes represented as binary; coded age 40–79." },
+    "AHA PREVENT":      { category: "general", horizon: "10y", implementationChecked: true, fn: (p) => prevent(p), note: "Base total-CVD equation incl. heart failure; coded age 30–79." },
+    "Framingham":       { category: "general", horizon: "10y", implementationChecked: true, fn: (p) => framingham(p), note: "Broad general-population CVD composite; coded age 30–74." },
+    "UKPDS":            { category: "T2D", horizon: "10y", implementationChecked: true, fn: (p) => ukpds(p), note: "T2D engine; the duration term is structurally non-transportable to long-duration T1D." },
+    "ADVANCE*":         { category: "T2D", horizon: "10y*", implementationChecked: true, fn: (p) => advance(p, 10), note: "Native four-year endpoint extrapolated to ten years under a constant-hazard assumption." },
   };
 
-  // risk-category banding (NICE/Steno 10-yr CVD): low <10, moderate 10–20, high >=20
-  function band(pct) { return pct < 10 ? 0 : (pct < 20 ? 1 : 2); }
-  const BAND_LABEL = ["low (<10%)", "moderate (10–20%)", "high (≥20%)"];
+  // Common analytic bands for ordinal agreement; not universal treatment thresholds.
+  function band(pct) { return Number.isFinite(pct) ? (pct < 10 ? 0 : (pct < 20 ? 1 : 2)) : -1; }
+  const BAND_LABEL = ["<10%", "10–<20%", "≥20%"];
 
   const API = { hba1cPctToMmol, hba1cMmolToPct, MODELS, band, BAND_LABEL,
     steno, score2diabetes, score2, pce, qrisk3, prevent, framingham, ukpds, ukpdsStroke, advance, cederholm, scottishSwedish };
