@@ -3,8 +3,8 @@ SCORE2-Diabetes (ESC, Eur Heart J 2023;44:2544; DOI 10.1093/eurheartj/ehad260).
 
 Sex-specific competing-risk model extending SCORE2 with three diabetes terms
 (age at diagnosis, HbA1c, eGFR), recalibrated to four European risk regions.
-Coefficients/baseline/scales transcribed from the ESC-aligned open implementation
-and confirmed by the extraction pass to reproduce the paper's worked examples.
+Coefficients, baseline values and scales are transcribed from the ESC-aligned open
+implementation and reproduce the paper's worked examples at reported precision.
 
 3 steps:
   LP   = sum(beta * centered_term)            (sex-specific)

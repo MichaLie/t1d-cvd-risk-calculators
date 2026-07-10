@@ -3,10 +3,12 @@ from __future__ import annotations
 
 from math import isfinite, isnan
 
+from eval.harness.categories import band, band_label
 from eval.harness.models import REGISTRY
 from eval.harness.patient import Patient
 from eval.models.qrisk3 import qrisk3_risk
 from eval.models.score2_diabetes import score2_diabetes_risk
+from eval.models.steno_t1 import StenoPatient, steno_risk
 
 
 def assert_close(name: str, got: float, expected: float, tol: float) -> None:
@@ -39,6 +41,17 @@ def test_score2_diabetes_age_guard() -> None:
     assert isnan(score2_diabetes_risk(age=80, **params))
 
 
+def test_steno_ihd_stroke_table4_regression() -> None:
+    patient = StenoPatient(
+        age=50, female=True, duration=30, hba1c_pct=70 / 10.929 + 2.15,
+        sbp=130, ldl=2.0, egfr=100, albuminuria="normal", smoker=False,
+        regular_exercise=True,
+    )
+    risk_percent = 100 * steno_risk(patient, 10, "ihd_stroke")
+    assert_close("Steno IHD/stroke Supplemental Table 4 regression", risk_percent,
+                 8.37492513748504, 1e-12)
+
+
 def test_scottish_swedish_adapter_retinopathy() -> None:
     patient = Patient(
         age=60, female=True, duration=20, hba1c_pct=8.0, sbp=130,
@@ -53,11 +66,22 @@ def test_scottish_swedish_adapter_retinopathy() -> None:
         )
 
 
+def test_common_analytic_band_boundaries() -> None:
+    assert band(9.999) == 0
+    assert band(10.0) == 1
+    assert band(19.999) == 1
+    assert band(20.0) == 2
+    assert band(float("nan")) == -1
+    assert band_label(float("nan")) == "not available"
+
+
 def main() -> None:
     tests = [
         test_qrisk3_missing_sbps5,
         test_score2_diabetes_age_guard,
+        test_steno_ihd_stroke_table4_regression,
         test_scottish_swedish_adapter_retinopathy,
+        test_common_analytic_band_boundaries,
     ]
     for test in tests:
         test()

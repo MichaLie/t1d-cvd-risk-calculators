@@ -3,8 +3,9 @@ Discordance / agreement metrics for the in-silico head-to-head.
 
 These quantify how much calculators DISAGREE on the same patients. They make
 NO claim about which model is correct (no outcomes here) — this is by design an
-agreement study. Headline metric is pairwise Cohen's kappa on risk categories;
-supported by exact-agreement rate, Bland-Altman on predicted risk, and the
+agreement study. The headline metric is pairwise Cohen's kappa after outputs are
+mapped to common analytic bands and is supported by exact-agreement rate,
+Bland-Altman on predicted risk, and the
 distribution of pairwise predicted-risk ratios.
 """
 from __future__ import annotations

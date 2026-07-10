@@ -16,8 +16,9 @@ Two endpoints are published:
 The eGFR term uses log2(eGFR) with an age-dependent coefficient
 (<40 vs >=40 years). HbA1c enters in mmol/mol.
 
-This module is intentionally dependency-light (pure math) so it can be
-validated cell-by-cell against the live web tool and reused in the eval grid.
+This module is intentionally dependency-light (pure math) so selected output
+can be checked against the live web tool and the implementation reused in the
+evaluation grid.
 """
 from __future__ import annotations
 from dataclasses import dataclass
@@ -108,7 +109,7 @@ def steno_risk(p: StenoPatient, years: int = 10, outcome: str = "cvd") -> float:
 
 
 if __name__ == "__main__":
-    # Reference test profiles for validation against the live web tool.
+    # Reference profiles for implementation checks against the live web tool.
     cases = {
         "A: 50M, dur20, SBP140, LDL3.0, A1c8.0%, eGFR90, smoker, exercises, normo": StenoPatient(
             age=50, female=False, duration=20, sbp=140, ldl=3.0, hba1c_pct=8.0,

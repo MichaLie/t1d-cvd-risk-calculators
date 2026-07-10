@@ -2,7 +2,7 @@
 QRISK3 (2017), Hippisley-Cox BMJ 2017;357:j2099.
 Sex-specific 10-yr CVD (CHD/stroke/TIA) for UK adults 25-84.
 Coefficients verbatim from the official ClinRisk LGPL C source; the female
-equation was web-validated against qrisk.org (19.1% reference case).
+equation reproduces the qrisk.org reference case (19.1%) at reported precision.
 
 Crucially, QRISK3 has SEPARATE type-1 and type-2 diabetes terms -> it is the
 only general tool here that does not treat T1D as generic diabetes.

@@ -5,8 +5,8 @@ recalibrated to 4 European risk regions. SCORE2 has NO diabetes covariate by
 design (that is the raison d'etre of the separate SCORE2-Diabetes model).
 
 Shares the region recalibration scale factors with SCORE2-Diabetes.
-Valid age 40-69 -> returns NaN outside (SCORE2-OP covers >=70; its scales were
-flagged approximate in extraction, so we do not extrapolate here).
+Valid age 40-69 -> returns NaN outside. SCORE2-OP covers ages >=70 but is not
+implemented here, so this module does not extrapolate beyond the SCORE2 range.
 """
 from __future__ import annotations
 from math import exp, log
@@ -26,7 +26,7 @@ B = {
 def score2_risk(*, female: bool, age: float, smoker: bool, sbp: float,
                 total_chol: float, hdl: float, diabetes: bool = False,
                 region: str = "high") -> float:
-    """10-yr CVD risk (%). Returns NaN outside the validated 40-69 age range.
+    """10-yr CVD risk (%). Returns NaN outside the coded 40-69 age range.
 
     `diabetes` is accepted for call-site compatibility but IGNORED: published
     SCORE2 has no diabetes term. Diabetic patients should use SCORE2-Diabetes.

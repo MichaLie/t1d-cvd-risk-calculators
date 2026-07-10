@@ -1,0 +1,38 @@
+variable,implementation,status
+Cohort purpose,"Illustrative, assumption-based case mix; not sampled or fitted from patient-level registry data and not population-representative",Design statement
+Age,"Normal(mean 45, SD 14), clipped to 18-85 years",Simulated
+Age at diagnosis,"Normal(mean 22, SD 12), clipped to 1 to age-1 years",Simulated
+Diabetes duration,Age minus age at diagnosis,Derived
+Duration boundary,"Age at diagnosis is clipped to age-1; 1,134 profiles therefore have duration exactly 1 year",Generator consequence
+HbA1c,"Normal(mean 8.2%, SD 1.3), clipped to 5.5-13.0%",Simulated; one current value only
+Long-term/mean HbA1c,Set equal to current HbA1c where required,Fixed substitution
+SBP,"Normal(mean 128, SD 16), clipped to 95-200 mmHg",Simulated
+DBP,78 mmHg,Fixed default
+Blood-pressure treatment,"If SBP >140 mmHg, probability 0.60; otherwise no",Derived stochastic flag
+Total cholesterol,"Normal(mean 4.7, SD 0.9), clipped to 2.8-8.0 mmol/L",Simulated
+HDL cholesterol,"Normal(mean 1.5, SD 0.4), clipped to 0.6-3.0 mmol/L",Simulated
+Triglycerides,"Log-normal(log mean 1.1, sigma 0.4), clipped to 0.4-6.0 mmol/L",Simulated
+LDL cholesterol,Friedewald: total cholesterol - HDL - triglycerides/2.2; minimum 0.3,Derived
+eGFR,"Normal(mean 102, SD 16) - 0.25*(age-40) - 0.35*duration; clipped to 15-140",Simulated with imposed dependence
+Albuminuria,Prevalence increases with duration and HbA1c; 65% of abnormal cases microalbuminuria,Simulated with imposed dependence
+Current smoking,Bernoulli probability 0.20,Simulated
+Female sex,Bernoulli probability 0.45,Simulated
+BMI,25 kg/m2,Fixed default
+Regular exercise,Yes,Fixed default
+Retinopathy,No,Fixed default
+Atrial fibrillation,No,Fixed default
+Prior CVD,No,Fixed default; primary-prevention cohort
+Statin treatment,No,Fixed default
+Family history of CVD,No,Fixed default
+Ethnicity,White,Fixed default
+SCORE2 region,High-risk region,Fixed to Central European/Czech setting
+Scottish deprivation,Quintile 3,Fixed in model adapter
+Common analytic bands,"<10%, 10 to <20%, and >=20%; not native treatment thresholds",Analysis choice
+Mean kappa,Unweighted mean of finite pairwise-complete linear-weighted kappas; pairs with n<30 or identical single-category marginals are excluded,Analysis choice
+Randomisation and robustness,Single seed 20260613 and one prespecified generator parameter set; no repeated-seed or distribution-perturbation analysis,Analysis limitation
+Verified runtime,Python 3.12.0; NumPy 2.2.6; pandas 2.3.3; SciPy 1.16.3; Matplotlib 3.10.8; Node 22.14.0,Environment snapshot
+QRISK3 adapter,Townsend score 0; current smoking mapped to category 2; SBP variability raw input 0; other comorbidities off,Documented adaptation
+Scottish-Swedish adapter,Current smoking proxies ever-smoking; sex-default height and BMI-derived weight; current HbA1c proxies mean HbA1c; SIMD quintile 3; fitted x1.32 calibration,Documented adaptation
+ADVANCE adapter,Albuminuria mapped to ACR 10/100/500 mg/g; native 4-year risk extrapolated to 10 years under constant hazard,Documented adaptation
+UKPDS adapter,CHD and stroke combined using an independence approximation,Documented adaptation
+Cederholm endpoint,Native 5-year endpoint is available in the browser but excluded from the 10-year agreement matrix,Horizon rule
