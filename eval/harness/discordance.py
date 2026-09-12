@@ -17,9 +17,22 @@ import pandas as pd
 def cohen_kappa(a: Sequence[int], b: Sequence[int], weights: str | None = None,
                 k: int | None = None) -> float:
     """Cohen's kappa for two label vectors. weights: None | 'linear' | 'quadratic'."""
-    a = np.asarray(a, int); b = np.asarray(b, int)
+    if weights not in (None, "linear", "quadratic"):
+        raise ValueError("weights must be None, 'linear', or 'quadratic'")
+    a = np.asarray(a); b = np.asarray(b)
+    if a.ndim != 1 or b.ndim != 1 or a.shape != b.shape:
+        raise ValueError("labels must be one-dimensional vectors of equal length")
+    if not (np.isfinite(a).all() and np.isfinite(b).all()):
+        raise ValueError("filter missing labels before calculating kappa")
+    if np.any(a < 0) or np.any(b < 0) or np.any(a != np.floor(a)) or np.any(b != np.floor(b)):
+        raise ValueError("labels must be non-negative integers")
+    a = a.astype(int); b = b.astype(int)
+    if len(a) == 0:
+        return float("nan")
     if k is None:
         k = int(max(a.max(), b.max())) + 1
+    if not isinstance(k, (int, np.integer)) or k < 1 or np.any(a >= k) or np.any(b >= k):
+        raise ValueError("k must exceed the largest label")
     O = np.zeros((k, k), float)
     for i, j in zip(a, b):
         O[i, j] += 1
@@ -37,7 +50,7 @@ def cohen_kappa(a: Sequence[int], b: Sequence[int], weights: str | None = None,
         w = d if weights == "linear" else d ** 2
     denom = (w * E).sum()
     if denom == 0:
-        return 1.0
+        return float("nan")  # Identical single-category marginals: undefined, not perfect kappa.
     return 1.0 - (w * O).sum() / denom
 
 

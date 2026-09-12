@@ -1,0 +1,48 @@
+# Methods and implementation scope
+
+This software accompanies *Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison*. It compares existing equations; it does not develop or clinically validate a new prediction model.
+
+## Numerical scope and checks
+
+The primary matrix includes ten 10-year endpoints from nine model families. Different endpoint definitions remain explicit. The browser additionally displays Cederholm’s native five-year estimate, outside the 10-year agreement analysis. Source citations and equation definitions are recorded in each Python model module; literature-figure citations and locators are in `eval/figure_data.json`.
+
+| Implementation | Endpoint and source | Material scope or adaptation |
+|---|---|---|
+| Steno T1 | Composite CVD and separately fitted IHD/stroke; [Vistisen 2016](https://doi.org/10.1161/CIRCULATIONAHA.115.018844), including Supplemental Table 4 | Selected composite-tool outputs and narrower-endpoint coefficients checked. Published external validation was at five years; ten-year performance was internally assessed. |
+| Cederholm | Five-year CHD/stroke; [Cederholm 2011](https://doi.org/10.1111/j.1464-5491.2011.03342.x) | Browser only; prior CVD is a model predictor. Worked example checked to published precision. |
+| SCORE2-Diabetes | CV death, MI, stroke; [SCORE2-Diabetes 2023](https://doi.org/10.1093/eurheartj/ehad263) | T2D equation; onset age used as age at diabetes diagnosis. High-risk region in primary analysis; published illustrative cases checked. |
+| SCORE2 | CV death, MI, stroke; [SCORE2 2021](https://doi.org/10.1093/eurheartj/ehab310) | Intended for people without diabetes. Primary specification sets the published diabetes term to zero; applying that term is a separate sensitivity. Published illustrative cases checked. |
+| PCE | Hard ASCVD; [Goff 2013](https://doi.org/10.1161/01.cir.0000437741.48606.98) | Generic diabetes indicator; sex/race-specific equations. Published illustrative cases checked. |
+| QRISK3 | CHD, ischaemic stroke, TIA; [Hippisley-Cox 2017](https://doi.org/10.1136/bmj.j2099) | Dedicated T1D term. Python and restricted browser adapter independently compared against bundled original ClinRisk C source; see below. |
+| PREVENT | Base total CVD, including HF; [Khan 2024](https://doi.org/10.1161/CIRCULATIONAHA.123.067626) | Generic diabetes indicator. Optional HbA1c, albuminuria and deprivation extensions excluded. Published cases and selected reference-package output checked. |
+| Framingham | General CVD composite; [D’Agostino 2008](https://doi.org/10.1161/CIRCULATIONAHA.107.699579) | Laboratory-based equation; generic diabetes indicator. Published worked cases checked. |
+| UKPDS-CVD† | Paper CHD and stroke equations; [Stevens 2001](https://doi.org/10.1042/cs1010671), [Kothari 2002](https://doi.org/10.1161/01.STR.0000020091.07144.C7) | Age at diagnosis and duration enter separately. Combined risk is an independence approximation, not a native UKPDS endpoint. Published worked cases checked; see parameter-source distinction below. |
+| ADVANCE* | Native four-year CV death, MI, stroke; [Kengne 2011](https://doi.org/10.1177/1741826710394270) | Reconstructed mean linear predictor 6.5267; ACR category substitutions 10/100/500 mg/g; ten-year constant-hazard extrapolation. Baseline identity and port parity are internal checks, not independent reproduction of an official calculator. A sensitivity excludes this implementation. |
+
+Age guards use continuous intervals corresponding to the displayed integer age ranges: SCORE2 [40,70), SCORE2-Diabetes/PCE [40,80), PREVENT [30,80), QRISK3 [25,85), Framingham [30,75). A coded age guard is not a statement that all other derivation criteria are met. Other extrapolations, including UKPDS diagnosis age and duration and ADVANCE derivation eligibility, are shown as cautions in the browser. Low-level functions expect valid inputs; the browser applies plausibility checks before calling them.
+
+The Scottish–Swedish model is retained in the literature appraisal and Figures 1–3, but excluded from executable code and all numerical comparisons. Its published Table 4 does not establish all terms needed to reproduce the final specification available in the authors’ app. Combining terms from different model specifications or fitting a multiplier to rounded app outputs would not independently reproduce that model. This exclusion concerns reproducibility of this repository’s implementation, not the original model’s published validation. Consult [McGurnaghan 2021](https://doi.org/10.1007/s00125-021-05478-4) and the [authors’ illustrative tool](https://diabepi.shinyapps.io/cvdrisk/).
+
+## QRISK3 source and inputs
+
+The original QRISK3-2017 C source is bundled with its copyright, licence and disclaimer. Its two function bodies match the archived ClinRisk source in two pinned public repositories, after ignoring whitespace and comments. Source URLs, commit identifiers and SHA-256 are given in [the source notice](third_party/qrisk3/NOTICE.md). The offline test compares 1,800 Python and 1,800 browser-adapter cases against compiled C across both sexes, all nine represented ethnicity codes, all five smoking categories and age boundaries. It uses integer ages because the original C API takes an integer; fractional-age evaluation is a continuous extension of the equation, checked for Python/JavaScript consistency rather than claimed identical to the C input conversion.
+
+The cohort adapter uses White ethnicity, Townsend 0, raw SBP variability 0, light-current-smoking category 2 for smokers, eGFR <60 as the renal flag, and absent unlisted comorbidities or medications. The browser additionally maps South Asian to Indian, Black to Caribbean, and Other to QRISK3 category 9. These mappings are approximations. The Python function exposes all source boolean predictors; the browser implements the inputs of this comparison tool. [QRISK3’s disclaimer](metatool/qrisk3-notice.html) applies to every displayed or exported QRISK3 score and must accompany redistributed results.
+
+## UKPDS parameter-source distinction
+
+The primary implementation explicitly follows the published UKPDS 56/60 equations and their worked examples, using their printed parameters without the proprietary engine’s regression-dilution adjustment. The CHD lipid contribution uses log(TC/HDL); the Kothari stroke equation uses `1.138 ** (TC/HDL - 5.11)`. The [Oxford DTU parameter information](https://www.rdm.ox.ac.uk/about/our-facilities-and-units/DTU/software/risk-engine/faq), dated 5 September 2024, instead labels the stroke predictor “Log Lipid Ratio” with centre 1.593026 and coefficient 1.138088189. This is a functional-form difference as well as a precision difference.
+
+The primary equation is fixed to the published paper specification, rather than silently selecting a different form. `eval.robustness` also reports an **Oxford stroke-parameter sensitivity**: it substitutes the 2024 full-precision stroke parameters and log lipid term, while retaining the paper CHD component and independence combination. It is not a full reproduction of the Oxford desktop Risk Engine, its fatal endpoints or its regression-dilution settings. The implementation and sensitivity must be described by these names when reporting results.
+
+UKPDS-CVD combines CHD and stroke as `1 - (1 - CHD) * (1 - stroke)`. The required independence is an analytic approximation. T2D derivation, diagnosis-age limits and duration extrapolation remain limitations regardless of parameter choice.
+
+## Cohort, agreement and sensitivity analyses
+
+The main dataset contains 10,000 assumption-based synthetic profiles generated with NumPy seed 20260613. Age and diagnosis age are clipped normal draws; other measurements and dependencies are specified in `eval/harness/profiles.py`. This case mix is not fitted to a registry or intended to represent a population. Diagnosis-age clipping creates a point mass at one year of duration. The analysis derives LDL with a 0.3 mmol/L floor; the browser instead accepts measured LDL and requires it when triglycerides are at least 4.5 mmol/L. Sensitivity analyses exclude high-triglyceride/floored-LDL profiles and duration-boundary profiles.
+
+Bands are <10%, 10 to <20%, and ≥20%, used solely for ordinal comparison. Each pair uses profiles with finite outputs from both models. Cohen’s κ uses linear ordinal weights; the reported mean is the unweighted arithmetic mean of finite distinct-pair κ values. No clinical outcome is available. κ cannot assess discrimination, calibration, net benefit, or over/underprediction. Identical single-category marginals yield undefined κ, retained as missing alongside exact agreement. Subgroup analyses omit pairs with fewer than 30 observations.
+
+The supplementary analyses describe age, early-onset, renal-risk and favourable-risk-factor subgroups; the alternative SCORE2 diabetes term; five cohort seeds (20260613–20260617); common age support; duration/LDL exclusions; exclusion of ADVANCE; a narrower atherosclerotic endpoint subset; and a structured factorial grid. These exploratory checks are not preregistered validation. Endpoint mismatch, input substitutions and synthetic-distribution choices remain limitations even if agreement is stable.
+
+Literature discrimination values in Figure 3 come from published studies; they are independent of the synthetic comparison and must not be attributed to the local implementations. Six figure legends identify sources, endpoint distinctions and assumptions. Figure 6 is an author synthesis, not a validated treatment algorithm.

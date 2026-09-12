@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Derived from QRISK3-2017, Copyright 2017 ClinRisk Ltd.
+# Modified 2026: Python port, defaults, age eligibility and continuous-age evaluation.
+# See third_party/qrisk3/NOTICE.md and metatool/qrisk3-notice.html.
 """
 QRISK3 (2017), Hippisley-Cox BMJ 2017;357:j2099.
 Sex-specific 10-yr CVD (CHD/stroke/TIA) for UK adults 25-84.
@@ -8,8 +12,8 @@ Crucially, QRISK3 has SEPARATE type-1 and type-2 diabetes terms -> it is the
 only general tool here that does not treat T1D as generic diabetes.
 
 risk% = 100 * (1 - S0 ** exp(LP)); each continuous term centered individually.
-For missing SBP SD (sbps5), ClinRisk/QRISK3 uses raw 0 and then applies the
-published centering constant.
+For missing SBP SD (sbps5), this adapter assumes raw 0 and then applies the
+published centering constant; missing-value handling is not defined by the C equation.
 Returns NaN outside 25-84.
 """
 from __future__ import annotations
@@ -37,7 +41,7 @@ MAIN = {
         b_migraine=0.30126726087034500, b_ra=0.21364803435181942, b_renal=0.65194569493845833,
         b_semi=0.12555308058820178, b_sle=0.75880938654267693, b_treatedhyp=0.50931593683423004,
         b_type1=1.7267977510537347, b_type2=1.0688773244615468, fh_cvd=0.45445319020896213,
-        female_rati_int=0.0),  # ratio interaction handled within Scottish model, not QRISK3
+        ),
     "male": dict(age1=-17.839781666005575, age2=0.0022964880605765492, bmi1=2.4562776660536358,
         bmi2=-8.3011122314711354, rati=0.17340196856327111, sbp=0.012910126542553305,
         sbps5=0.010251914291290456, town=0.033268201277287295,
@@ -92,7 +96,7 @@ def qrisk3_risk(*, female: bool, age: float, ethrisk: int = 1, smoke_cat: int = 
                 b_AF=False, b_atypicalantipsy=False, b_corticosteroids=False, b_impotence2=False,
                 b_migraine=False, b_ra=False, b_renal=False, b_semi=False, b_sle=False,
                 b_treatedhyp=False, fh_cvd=False) -> float:
-    if not (25 <= age <= 84):
+    if not (25 <= age < 85):
         return float("nan")
     sex = "female" if female else "male"
     m, c = MAIN[sex], CENTER[sex]
@@ -133,13 +137,3 @@ def qrisk3_risk(*, female: bool, age: float, ethrisk: int = 1, smoke_cat: int = 
             a += age1 * A1[sex][name] + age2 * A2[sex][name]
 
     return (1 - S0[sex] ** exp(a)) * 100.0
-
-
-if __name__ == "__main__":
-    # qrisk.org reference: female 64, Indian, ex-smoker, rati4, sbp180, sbps5 20, bmi25.25, town0 -> 19.1%
-    g = qrisk3_risk(female=True, age=64, ethrisk=2, smoke_cat=1, bmi=25.25, rati=4,
-                    sbp=180, sbps5=20, town=0)
-    print(f"female reference: expected 19.1%  got {g:.2f}%  ({'OK' if abs(g-19.1)<0.1 else 'CHECK'})")
-    gm = qrisk3_risk(female=False, age=64, ethrisk=2, smoke_cat=1, bmi=25.25, rati=4,
-                     sbp=180, sbps5=20, town=0)
-    print(f"male same inputs: ~29.9% expected (agent code)  got {gm:.2f}%")

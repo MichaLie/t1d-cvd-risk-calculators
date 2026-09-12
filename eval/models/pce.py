@@ -35,7 +35,7 @@ def pce_risk(*, female: bool, age: float, total_chol_mgdl: float, hdl_mgdl: floa
              sbp: float, treated_bp: bool, smoker: bool, diabetes: bool,
              black: bool = False) -> float:
     """10-yr ASCVD risk (%). Returns NaN outside 40-79."""
-    if not (40 <= age <= 79):
+    if not (40 <= age < 80):
         return float("nan")
     b = G[_group(female, black)]
     la, ltc, lhdl, lsbp = log(age), log(total_chol_mgdl), log(hdl_mgdl), log(sbp)

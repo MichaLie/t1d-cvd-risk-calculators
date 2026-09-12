@@ -1,3 +1,10 @@
+License scope
+
+The MIT licence below applies to original project code and documentation, except
+eval/models/qrisk3.py, metatool/qrisk3.js and third_party/qrisk3/qrisk3-2017.c,
+which are LGPL-3.0-or-later (Copyright 2017 ClinRisk Ltd.). See
+third_party/qrisk3/NOTICE.md and LICENSES/LGPL-3.0.txt and LICENSES/GPL-3.0.txt.
+
 MIT License
 
 Copyright (c) 2026 Michaela Liegertová and co-authors
@@ -21,6 +28,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ----------------------------------------------------------------------
-The accompanying DATA and FIGURES (eval/out/*.csv, eval/out/*.png) are
+The accompanying DATA and FIGURES (eval/out/*.csv, eval/figure_data.json, submission_figures/) are
 released under the Creative Commons Attribution 4.0 International license
 (CC-BY-4.0): https://creativecommons.org/licenses/by/4.0/
+
+QRISK3 outputs must retain the upstream notice and disclaimer as documented in
+third_party/qrisk3/NOTICE.md, including when datasets or figures are reused.

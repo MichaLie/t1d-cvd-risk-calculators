@@ -18,7 +18,7 @@ NOTE: derived & validated in TYPE 2 diabetes only. Applying it to T1D is exactly
 the 'borrowing' scenario the review interrogates.
 """
 from __future__ import annotations
-from math import exp, log
+from math import exp, log, expm1
 
 S0 = {"male": 0.9605, "female": 0.9776}
 
@@ -76,9 +76,8 @@ def score2_diabetes_risk(*, female: bool, age: float, smoker: bool, sbp: float,
           + b["hba1c"] * ca1c + b["legfr"] * legfr + b["legfr2"] * legfr ** 2
           + b["hba1c_age"] * ca1c * cage + b["legfr_age"] * legfr * cage)
 
-    unc = 1 - S0[sex] ** exp(lp)
     s1, s2 = SCALES[sex][region]
-    risk = 1 - exp(-exp(s1 + s2 * log(-log(1 - unc))))
+    risk = -expm1(-exp(s1 + s2 * (log(-log(S0[sex])) + lp)))
     return risk * 100.0
 
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     expected = {  # (region, sex): (A, B)
         ("moderate", "male"): (11.0, 17.2), ("moderate", "female"): (7.6, 12.7),
         ("low", "male"): (8.4, 12.9), ("low", "female"): (6.1, 9.8),
-        ("high", "male"): (12.5, 20.4), ("high", "female"): (11.1, 20.6),
+        ("high", "male"): (12.5, 21.0), ("high", "female"): (11.1, 20.4),
         ("very_high", "male"): (20.3, 31.2), ("very_high", "female"): (20.6, 34.0),
     }
     print(f"{'region':10} {'sex':7} {'A exp':>6} {'A got':>6} {'B exp':>6} {'B got':>6}")

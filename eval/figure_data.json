@@ -1,0 +1,649 @@
+{
+  "timeline": [
+    {
+      "model": "Pittsburgh EDC",
+      "year": 2010,
+      "n": 603,
+      "type": "T1D",
+      "source": "17",
+      "locator": "Abstract; Methods, final dataset",
+      "horizon": "10-year"
+    },
+    {
+      "model": "Cederholm NDR",
+      "year": 2011,
+      "n": 3661,
+      "type": "T1D",
+      "source": "13",
+      "locator": "Abstract, p.1",
+      "horizon": "5-year"
+    },
+    {
+      "model": "EURODIAB",
+      "year": 2014,
+      "n": 1973,
+      "type": "T1D",
+      "source": "06",
+      "locator": "Abstract, p.2; broader major-outcome composite",
+      "horizon": "3/5/7-year"
+    },
+    {
+      "model": "Steno T1",
+      "year": 2016,
+      "n": 4306,
+      "type": "T1D",
+      "source": "05",
+      "locator": "Abstract, p.1",
+      "horizon": "5/10-year"
+    },
+    {
+      "model": "Scottish–Swedish",
+      "year": 2021,
+      "n": 27527,
+      "type": "T1D",
+      "source": "08",
+      "locator": "Abstract, p.1",
+      "horizon": "10-year"
+    },
+    {
+      "model": "LIFE-T1D",
+      "year": 2024,
+      "n": 39756,
+      "type": "T1D",
+      "source": "12",
+      "locator": "Abstract, p.1",
+      "horizon": "10-year/lifetime"
+    },
+    {
+      "model": "UKPDS CHD",
+      "year": 2001,
+      "n": 4540,
+      "type": "T2D",
+      "source": "Stevens",
+      "locator": "Abstract, p.1; size applies to CHD model",
+      "horizon": "variable horizon"
+    },
+    {
+      "model": "ADVANCE",
+      "year": 2011,
+      "n": 7168,
+      "type": "T2D",
+      "source": "33",
+      "locator": "Abstract, p.1",
+      "horizon": "4-year"
+    },
+    {
+      "model": "DIAL",
+      "year": 2019,
+      "n": 389366,
+      "type": "T2D",
+      "source": "20",
+      "locator": "Abstract, pp.1–2",
+      "horizon": "10-year/lifetime"
+    },
+    {
+      "model": "SCORE2-Diabetes",
+      "year": 2023,
+      "n": 229460,
+      "type": "T2D",
+      "source": "32",
+      "locator": "Abstract, p.1",
+      "horizon": "10-year"
+    },
+    {
+      "model": "Framingham",
+      "year": 2008,
+      "n": 8491,
+      "type": "general",
+      "source": "DAgostino",
+      "locator": "Abstract, p.1",
+      "horizon": "10-year"
+    },
+    {
+      "model": "PCE",
+      "year": 2013,
+      "n": 24626,
+      "type": "general",
+      "source": "11",
+      "locator": "Appendix 4, p.23: 11240+9098+2641+1647",
+      "horizon": "10-year"
+    },
+    {
+      "model": "QRISK3",
+      "year": 2017,
+      "n": 7889803,
+      "type": "general",
+      "source": "34",
+      "locator": "Results, p.5",
+      "horizon": "10-year"
+    },
+    {
+      "model": "SCORE2",
+      "year": 2021,
+      "n": 677684,
+      "type": "general",
+      "source": "21",
+      "locator": "Abstract, p.1",
+      "horizon": "10-year"
+    },
+    {
+      "model": "PREVENT",
+      "year": 2024,
+      "n": 3281919,
+      "type": "general",
+      "source": "35",
+      "locator": "Abstract, p.3; issue year 2024",
+      "horizon": "10/30-year"
+    }
+  ],
+  "sources": {
+    "17": {
+      "doi": "10.1016/j.diabres.2010.02.009"
+    },
+    "13": {
+      "doi": "10.1111/j.1464-5491.2011.03342.x"
+    },
+    "06": {
+      "doi": "10.1007/s00125-014-3358-x"
+    },
+    "05": {
+      "doi": "10.1161/CIRCULATIONAHA.115.018844"
+    },
+    "08": {
+      "doi": "10.1007/s00125-021-05478-4"
+    },
+    "12": {
+      "doi": "10.1111/dom.15531"
+    },
+    "Stevens": {
+      "doi": "10.1042/cs1010671"
+    },
+    "33": {
+      "doi": "10.1177/1741826710394270"
+    },
+    "20": {
+      "doi": "10.1093/eurheartj/ehy839"
+    },
+    "32": {
+      "doi": "10.1093/eurheartj/ehad263"
+    },
+    "DAgostino": {
+      "doi": "10.1161/CIRCULATIONAHA.107.699579"
+    },
+    "11": {
+      "doi": "10.1161/01.cir.0000437741.48606.98"
+    },
+    "34": {
+      "doi": "10.1136/bmj.j2099"
+    },
+    "21": {
+      "doi": "10.1093/eurheartj/ehab310"
+    },
+    "35": {
+      "doi": "10.1161/CIRCULATIONAHA.123.067626"
+    },
+    "14": {
+      "doi": "10.1016/j.jacadv.2024.101462"
+    }
+  },
+  "predictor_domains": [
+    "Current age / sex",
+    "Blood pressure",
+    "Lipids",
+    "Smoking",
+    "Duration / onset",
+    "HbA1c",
+    "Renal",
+    "Retinopathy",
+    "BP / lipid treatment",
+    "Other",
+    "Diabetes status / type"
+  ],
+  "predictors": [
+    {
+      "model": "Cederholm 2011",
+      "type": "T1D",
+      "source": "13",
+      "values": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "locator": "Abstract p.1; eight predictors; onset age is derived, no explicit current-age/sex term"
+    },
+    {
+      "model": "Steno 2016",
+      "type": "T1D",
+      "source": "05",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "locator": "Abstract p.1; Other=exercise"
+    },
+    {
+      "model": "EURODIAB 2014",
+      "type": "T1D",
+      "source": "06",
+      "values": [
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "locator": "Abstract p.2; Other=waist:hip ratio; broader major-outcome model"
+    },
+    {
+      "model": "Scottish–Swedish 2021",
+      "type": "T1D",
+      "source": "08",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      "locator": "Table 2 pp.6–7; Other=body size, deprivation, atrial fibrillation; duration represented by onset/current age"
+    },
+    {
+      "model": "LIFE-T1D 2024",
+      "type": "T1D",
+      "source": "12",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0
+      ],
+      "locator": "Abstract p.1; age time scale, sex-specific; Other=BMI"
+    },
+    {
+      "model": "SCORE2-Diabetes 2023",
+      "type": "T2D",
+      "source": "32",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "locator": "Abstract p.1"
+    },
+    {
+      "model": "DIAL 2019",
+      "type": "T2D",
+      "source": "20",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "locator": "Abstract pp.1–2; Other=BMI, insulin, prior CVD; BP/lipid treatment is not a predictor"
+    },
+    {
+      "model": "ADVANCE 2011",
+      "type": "T2D",
+      "source": "33",
+      "values": [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      "locator": "Abstract p.1 and Table 2 p.4; sex and age at diagnosis; Other=atrial fibrillation"
+    },
+    {
+      "model": "UKPDS CHD / stroke",
+      "type": "T2D",
+      "source": "Stevens",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "locator": "UKPDS56 Abstract/Table 2 plus UKPDS60 Table 3; union of CHD/stroke inputs; Other=ethnicity/AF"
+    },
+    {
+      "model": "SCORE2 2021",
+      "type": "general",
+      "source": "21",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "locator": "Abstract p.1; intended non-diabetic application"
+    },
+    {
+      "model": "PCE 2013",
+      "type": "general",
+      "source": "11",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1
+      ],
+      "locator": "Appendix 4, pp.23–25; sex/race-specific equations; Other=race"
+    },
+    {
+      "model": "PREVENT base 2024",
+      "type": "general",
+      "source": "35",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1
+      ],
+      "locator": "Statistical Analysis pp.7–8; base total-CVD model, excluding HF-only BMI and optional HbA1c/UACR/SDI"
+    },
+    {
+      "model": "QRISK3 2017",
+      "type": "general",
+      "source": "34",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      "locator": "Abstract p.1 and Box 1 p.4; dedicated T1D/T2D terms; Other includes BMI, ethnicity, deprivation and comorbidities"
+    },
+    {
+      "model": "Framingham 2008",
+      "type": "general",
+      "source": "DAgostino",
+      "values": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1
+      ],
+      "locator": "Abstract p.1; laboratory-based equation"
+    }
+  ],
+  "discrimination": [
+    {
+      "label": "Cederholm: derivation, 5 y",
+      "value": 0.83,
+      "stage": "development",
+      "source": "13",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Cederholm: validation, 4 y",
+      "value": 0.8,
+      "stage": "external",
+      "source": "13",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Steno: derivation, 5 y",
+      "value": 0.826,
+      "stage": "development",
+      "source": "05",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Steno: Funen, 5 y",
+      "value": 0.803,
+      "stage": "external",
+      "source": "05",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Pittsburgh: EURODIAB, men",
+      "value": 0.77,
+      "stage": "external",
+      "source": "17",
+      "locator": "Abstract; external-validation results",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Pittsburgh: EURODIAB, women",
+      "value": 0.78,
+      "stage": "external",
+      "source": "17",
+      "locator": "Abstract; external-validation results",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Scottish–Swedish: Scotland",
+      "value": 0.82,
+      "stage": "development",
+      "source": "08",
+      "locator": "Abstract p.1; Table 3 p.7",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Scottish–Swedish: Sweden",
+      "value": 0.85,
+      "stage": "external",
+      "source": "08",
+      "locator": "Abstract p.1; Table 3 p.7",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "LIFE-T1D: internal validation",
+      "value": 0.85,
+      "stage": "development",
+      "source": "12",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "LIFE-T1D: Funen",
+      "value": 0.77,
+      "stage": "external",
+      "source": "12",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "LIFE-T1D: UK Biobank",
+      "value": 0.73,
+      "stage": "external",
+      "source": "12",
+      "locator": "Abstract p.1",
+      "type": "T1D",
+      "separator_after": true
+    },
+    {
+      "label": "EURODIAB*: internal validation",
+      "value": 0.74,
+      "stage": "development",
+      "source": "06",
+      "locator": "Abstract p.2; broader major outcomes",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "EURODIAB*: EDC",
+      "value": 0.79,
+      "stage": "external",
+      "source": "06",
+      "locator": "Abstract p.2; broader major outcomes",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "EURODIAB*: FinnDiane",
+      "value": 0.82,
+      "stage": "external",
+      "source": "06",
+      "locator": "Abstract p.2; broader major outcomes",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "EURODIAB*: CACTI",
+      "value": 0.73,
+      "stage": "external",
+      "source": "06",
+      "locator": "Abstract p.2; broader major outcomes",
+      "type": "T1D",
+      "separator_after": true
+    },
+    {
+      "label": "Erqou: pooled T1D-specific",
+      "value": 0.81,
+      "stage": "pooled",
+      "source": "14",
+      "locator": "Results p.7; Figure 2",
+      "type": "T1D",
+      "separator_after": false
+    },
+    {
+      "label": "Erqou: pooled general / T2D",
+      "value": 0.75,
+      "stage": "pooled",
+      "source": "14",
+      "locator": "Results p.7; Figure 2",
+      "type": "general",
+      "separator_after": false
+    }
+  ],
+  "analysis_types": {
+    "Steno-CVD": "T1D",
+    "Steno-IHDstroke": "T1D",
+    "SCORE2-Diabetes": "T2D",
+    "SCORE2": "general",
+    "PCE": "general",
+    "QRISK3": "general",
+    "PREVENT": "general",
+    "UKPDS-CVD": "T2D",
+    "Framingham": "general",
+    "ADVANCE*": "T2D"
+  },
+  "analysis_labels": {
+    "Steno-CVD": "Steno CVD",
+    "Steno-IHDstroke": "Steno IHD/stroke",
+    "SCORE2-Diabetes": "SCORE2-Diabetes",
+    "SCORE2": "SCORE2",
+    "PCE": "PCE",
+    "QRISK3": "QRISK3",
+    "PREVENT": "PREVENT",
+    "UKPDS-CVD": "UKPDS-CVD†",
+    "Framingham": "Framingham",
+    "ADVANCE*": "ADVANCE*"
+  }
+}

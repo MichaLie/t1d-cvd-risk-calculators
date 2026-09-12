@@ -2,9 +2,7 @@
 Cross-model discordance run (NaN-aware: each tool scores only within its valid
 age range, comparisons are pairwise-complete).
 
-Reports all implemented endpoints with pairwise-complete comparisons. The
-Scottish-Swedish implementation uses the published final-model specification and
-keeps the coefficient-publication caveat explicit in the repository output.
+Reports the ten 10-year endpoints with pairwise-complete comparisons.
 
 NOT an accuracy study (no outcomes): this quantifies disagreement on identical
 synthetic T1D patients.
@@ -74,12 +72,6 @@ pair_report("SCORE2", "SCORE2-Diabetes", label="general SCORE2 vs its diabetes e
 print("\n=== Disagreement by age band (Steno IHD/stroke vs SCORE2-Diabetes) ===")
 for lo, hi, name in [(40, 50, "40-49"), (50, 60, "50-59"), (60, 70, "60-69")]:
     pair_report("Steno-IHDstroke", "SCORE2-Diabetes", extra=(ages >= lo) & (ages < hi), label=f"age {name}")
-
-# Scottish-Swedish is included in the table above; this line makes the
-# implementation caveat visible in command-line output.
-ss = np.array([REGISTRY["Scottish-Swedish"][2](p) for p in cohort], float)
-print(f"\n[IMPLEMENTATION CAVEAT] Scottish-Swedish mean={np.nanmean(ss):.1f}% median={np.nanmedian(ss):.1f}% "
-      f"(final-model implementation; coefficient-publication caveat documented in repository)")
 
 OUT.mkdir(parents=True, exist_ok=True)
 out = pd.DataFrame({"synthetic_id": np.arange(1, N + 1), **{m: risk[m] for m in models}})

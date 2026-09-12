@@ -65,7 +65,7 @@ class Patient:
     # --- lifestyle / other ---
     smoker: bool = False
     bmi: float = 25.0
-    regular_exercise: bool = True       # Steno: ">=3.5 h/week"
+    regular_exercise: bool = True       # Steno: regular physical activity, yes/no (cut point >=30 min/day)
     retinopathy: bool = False
     af: bool = False                    # atrial fibrillation (QRISK3)
     prior_cvd: bool = False

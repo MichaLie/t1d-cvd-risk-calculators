@@ -1,142 +1,43 @@
-# Cardiovascular risk prediction in type 1 diabetes — reproducible analysis and open comparison tool
+# Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison
 
-Open, reproducible companion to *"Cardiovascular risk prediction in type 1 diabetes:
-critical appraisal of current tools and an in-silico head-to-head comparison."*
+Companion research software, version **2.0.0**, for the manuscript with the title above. The browser tool compares published risk equations; the Python pipeline measures their agreement in a reproducible synthetic type 1 diabetes cohort. No patient records or observed cardiovascular outcomes are included. Agreement does not establish predictive accuracy, calibration, clinical benefit or suitability for treatment decisions.
 
-This repository contains everything needed to reproduce the quantitative analysis and to inspect
-and run the risk calculators yourself. It has two parts:
+[Open the browser calculator](https://michalie.github.io/t1d-cvd-risk-calculators/metatool/) · [Methods and model scope](METHODS.md) · [Figure legends](submission_figures/FIGURE_LEGENDS.md)
 
-**Launch the browser meta-calculator:** https://michalie.github.io/t1d-cvd-risk-calculators/metatool/
+The hosted calculator follows the published GitHub Pages version. To run this checkout, open `metatool/index.html` in a browser, or serve the repository with `python -m http.server 8000` and visit `http://localhost:8000/metatool/`. Inputs remain in the browser; the calculator requires no server, account or external scripts.
 
-1. **`eval/`** — a reproducible pipeline that implements 12 model endpoints from 11 calculator
-   families using published equations plus explicitly documented adaptations. The agreement
-   analysis runs the 11 ten-year or ten-year-adapted endpoints on a seeded synthetic
-   type-1-diabetes cohort; the native five-year Cederholm endpoint is reported separately.
-2. **`metatool/`** — a self-contained browser meta-calculator that runs the implemented calculators
-   side by side for one patient, flags where they occupy different common analytic bands, and lets
-   you recalibrate to local risk. Every coefficient is open in `models.js`.
+## Scope
 
-> **This is an agreement/discordance study, not an accuracy study.** No patient outcomes are used.
-> It quantifies how published tools disagree on identical inputs — not which one is "right."
-> No individual-patient data are used anywhere; the cohort is synthetic and seeded.
+The numerical comparison contains ten 10-year endpoints from nine model families: Steno composite CVD and IHD/stroke, SCORE2-Diabetes, SCORE2, PCE, QRISK3, PREVENT, UKPDS-CVD, Framingham and ADVANCE. Cederholm’s native five-year endpoint is available separately in the browser. General-population and T2D equations are applied to T1D as an exploratory comparison, outside their intended populations where applicable.
 
-## Calculators included
+The Scottish–Swedish model remains in the literature figures but is excluded from the calculator and numerical analysis because the sources available to this project do not establish a complete reproducible final-model specification. See the [original publication](https://doi.org/10.1007/s00125-021-05478-4) and [authors’ illustrative tool](https://diabepi.shinyapps.io/cvdrisk/). Other material adaptations, including ADVANCE’s centring/horizon and the UKPDS combined endpoint, are described in [METHODS.md](METHODS.md).
 
-**T1D-specific:** Steno Type 1 Risk Engine, Scottish–Swedish model (McGurnaghan 2021),
-Cederholm NDR (5-year). **Type-2-derived (off-label in T1D):** SCORE2-Diabetes, UKPDS Risk Engine,
-ADVANCE. **General-population (off-label in T1D):** SCORE2, QRISK3, Pooled Cohort Equations (ACC/AHA),
-AHA PREVENT, Framingham. The browser exposes 12 model endpoints from 11 calculator families. The
-10-year agreement matrix contains 11 endpoints from 10 families; the native 5-year Cederholm
-endpoint is excluded. The test harness performs selected source-paper, live-tool, and regression
-checks. These are implementation checks, not external clinical validation; endpoint-specific
-status is reported in the browser tool.
+## Reproduce and verify
 
-## Quickstart
+Use Python 3.12, Node.js 22 and a C compiler (`cc`, for the offline QRISK3 reference test). Install the hash-pinned dependencies in a virtual environment (`requirements-tested.in` records the direct versions used to generate the lock):
 
-Requires **Python 3.12** and (for the browser-tool tests) **Node 22**. No internet is needed after
-dependencies are installed.
-
-```bash
-python -m pip install -r requirements-lock.txt  # tested, fully resolved environment
-# or: python -m pip install -r requirements.txt # broader compatible lower bounds
-
-# reproduce the analysis (prints all statistics; writes results to eval/out/)
-python -m eval.run_eval          # mean off-diagonal κ = 0.39 ; per-tool risk summary
-python -m eval.smoke_test        # sanity check → "PIPELINE OK"
-python -m eval.model_assertions  # model-level regression and source checks
-python -m eval.supplement        # cohort, assumptions, sensitivity and coverage tables
-
-# regenerate the figures
-python -m eval.figures              # κ heatmap
-python -m eval.figures_companion    # timeline, predictor grid, C-stat forest, risk distributions
-python -m eval.fig_flowchart        # decision flowchart
-
-# the meta-calculator (no install, no server required)
-open metatool/index.html            # or: python3 -m http.server -d metatool
-node metatool/test_models.js        # implementation checks: 41/41 should pass
+```sh
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install --require-hashes -r requirements-lock.txt
+python -m eval.verify
 ```
 
-The synthetic cohort is generated with a fixed seed (`20260613`), so results are deterministic at
-the reported precision in a compatible Python/NumPy environment.
+This command runs the numerical, input-handling and Python/JavaScript checks; compares QRISK3 against the bundled original C source; regenerates the seeded analysis and sensitivity tables; and builds all six figures. It writes generated tables to `eval/out/` and final PDF/600-dpi PNG artwork to `submission_figures/`. The continuous-integration workflow runs the same command. Tests establish specified implementation properties, not clinical validation.
 
-The manuscript release was verified with Python 3.12.0, NumPy 2.2.6, pandas 2.3.3,
-SciPy 1.16.3, Matplotlib 3.10.8 and Node 22.14.0. `requirements-tested.in` records the tested
-top-level Python versions, while `requirements-lock.txt` contains the fully resolved dependency
-graph with hashes. `requirements.txt` retains broader lower bounds for ordinary use.
+For analysis or figure generation separately:
 
-## Browser meta-calculator
-
-The meta-calculator is a static browser app: it has no backend, no build step, no package install,
-and no external assets. It can be opened directly from `metatool/index.html` or served from any
-static host.
-
-For GitHub Pages, publish the repository from the root of the main branch. The top-level
-`index.html` redirects to `metatool/index.html`, so the repository Pages URL will open the
-calculator directly.
-
-## Layout
-
-```
-eval/
-  harness/      patient schema, synthetic-cohort generator, discordance metrics, model registry
-  models/       one file per calculator (published coefficients, fully commented)
-  run_eval.py   the main discordance run
-  figures.py, figures_companion.py, fig_flowchart.py
-  smoke_test.py
-  supplement.py supplementary cohort, assumption, sensitivity, and coverage tables
-  out/          generated outputs (committed for convenience; all regenerable):
-                  kappa_matrix.csv, cohort_risks.csv, synthetic_cohort.csv,
-                  synthetic_cohort_assumptions.csv, sensitivity_summary.csv,
-                  sensitivity_model_summary.csv, and the six figures
-metatool/
-  index.html    the meta-calculator UI (self-contained)
-  models.js     12 model endpoints from 11 calculator families ported to JavaScript
-  test_models.js selected worked-example, live-tool, and regression checks
-  README.md
+```sh
+python -m eval.run_eval
+python -m eval.supplement
+python -m eval.robustness
+python -m eval.build_submission_figures
 ```
 
-The CSV outputs are the canonical supplementary-analysis records. `synthetic_id` links rows in
-`synthetic_cohort.csv` and `cohort_risks.csv`; both files use the same deterministic row order.
-The formatted journal workbook is distributed as a fixed asset with the GitHub release.
+The primary cohort contains 10,000 profiles, seed 20260613. Only compact final summary tables are versioned; per-profile and pair-level tables are reproducible generated outputs. [Results documentation](eval/out/README.md) describes their interpretation. Literature values and publication locators are stored in `eval/figure_data.json`. Figure titles and explanatory notes are supplied as separate legends, without embedded captions in the artwork.
 
-### Figures
+## Citation and licensing
 
-| Figure | File (`eval/out/`) |
-|---|---|
-| Figure 1 | fig_model_timeline.png |
-| Figure 2 | fig_predictor_grid.png |
-| Figure 3 | fig_cstat_forest.png |
-| Figure 4 | kappa_heatmap.png |
-| Figure 5 | fig_risk_distributions.png |
-| Figure 6 | fig_decision_flowchart.png |
+Use [CITATION.cff](CITATION.cff) and cite the archived software version actually used. The associated manuscript title is given above; it does not imply that the manuscript has been published. A DOI for this software version must identify the corresponding archived release.
 
-## A note on the Scottish–Swedish model
-
-Its coefficients are taken from the published final model (McGurnaghan 2021, *Diabetologia*).
-The published coefficient table (Table 4) omits the age-at-entry term appearing in the final
-multivariable model; that term is restored here. A fitted ×1.32 constant aligns selected deployed-
-tool output because the published cubic and interaction coefficients are rounded to three decimals.
-This is a transparent reconstruction, not a coefficient-complete independent reproduction. The
-authors' R training code at `github.com/diabepi/t1cvdrisk` is referenced for provenance but **not
-redistributed here**.
-
-## License
-
-- **Code** — MIT (see `LICENSE`).
-- **Data & figures** (`eval/out/*.csv`, `eval/out/*.png`) — CC-BY-4.0.
-
-## Citing
-
-Please cite the associated paper and this versioned software release:
-
-> Liegertová M. T1D-CVD risk calculators: reproducible agreement analysis and open comparison
-> tool. Version 1.0.0. 2026. https://github.com/MichaLie/t1d-cvd-risk-calculators/releases/tag/v1.0.0
-
-Machine-readable citation metadata are provided in [`CITATION.cff`](CITATION.cff). Version 1.0.0
-adds the supplementary analysis, manuscript-aligned figures, and public documentation.
-
-## Disclaimer
-
-The meta-calculator is a transparent **decision-support and comparison** tool for research and
-education. It is **not a new validated prediction model** and **not a regulated medical device**.
-It must not be used for clinical care without local validation and appropriate regulatory approval.
+Original project code is MIT licensed. The QRISK3 Python/JavaScript ports and bundled ClinRisk C source are **LGPL-3.0-or-later**, with the upstream disclaimer and full licence texts included. Dataset and figure reuse is covered by CC BY 4.0; QRISK3 outputs must retain the [QRISK3 notice and disclaimer](third_party/qrisk3/NOTICE.md). See [LICENSE](LICENSE) for the scope of each licence.

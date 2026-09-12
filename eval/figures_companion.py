@@ -1,230 +1,135 @@
-"""Companion-paper figures for the T1D CV-calculator review."""
-import os
+"""Source-checked literature figures and data-backed simulation distributions.
+Titles, explanations and source locators are in submission_figures/FIGURE_LEGENDS.md
+and figure_data.json. See submission_figures/FIGURE_LEGENDS.md for interpretation.
+"""
+import sys
+from pathlib import Path
+if __package__ in (None, ''):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import json
 from pathlib import Path
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from matplotlib.colors import ListedColormap
+from eval.figure_style import WIDTH, DEFAULT_OUT, CTYPE, T1D_C, T2D_C, GEN_C, save_figure
 
-if __package__ in (None, ""):
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+DATA = json.loads((Path(__file__).with_name('figure_data.json')).read_text())
 
-from eval.harness.profiles import make_synthetic_cohort
-from eval.harness.models import REGISTRY, analysis_models
+def predictor_grid():
+    preds = DATA['predictor_domains']
+    rows = DATA['predictors']
+    M = np.array([r['values'] for r in rows])
+    fig, ax = plt.subplots(figsize=(WIDTH, 5.1))
+    ax.imshow(M, cmap=ListedColormap(['#f4f4f4', T1D_C]), vmin=0, vmax=1, aspect='auto')
+    ax.set_xticks(range(len(preds)), labels=preds, rotation=58, ha='right', rotation_mode='anchor')
+    ax.set_yticks(range(len(rows)), labels=[r['model'] for r in rows])
+    ax.tick_params(length=0, pad=4)
+    for i in range(len(rows)+1): ax.axhline(i-.5, color='white', lw=.7)
+    for j in range(len(preds)+1): ax.axvline(j-.5, color='white', lw=.7)
+    ax.axhline(4.5, color='#555555', lw=1)
+    ax.axhline(8.5, color='#555555', lw=1)
+    for tick, row in zip(ax.get_yticklabels(), rows): tick.set_color(CTYPE[row['type']])
+    ax.legend(handles=[Patch(facecolor=T1D_C, label='Included'), Patch(facecolor='#f4f4f4', edgecolor='#999999', label='Not included')],
+              loc='lower center', bbox_to_anchor=(.5,1.015), ncol=2, frameon=False, fontsize=8)
+    for sp in ax.spines.values(): sp.set_visible(False)
+    fig.legend(handles=[Line2D([],[],color=CTYPE[t],lw=2,label=l) for t,l in [('T1D','T1D-specific'),('T2D','T2D'),('general','General / mixed')]], loc='upper center', bbox_to_anchor=(.65,.995), ncol=3, frameon=False, fontsize=7.5)
+    fig.subplots_adjust(left=.315, right=.985, bottom=.255, top=.855)
+    save_figure(fig, 'fig_predictor_grid.png')
 
-DEFAULT_OUT = Path(__file__).resolve().parent / "out"
-OUT = Path(os.environ.get("FIG_OUT_DIR", str(DEFAULT_OUT)))
-T1D_C = "#2166ac"; T2D_C = "#b2182b"; GEN_C = "#7f7f7f"
-CTYPE = {"T1D": T1D_C, "T2D": T2D_C, "general": GEN_C}
-
-def save_figure(fig, filename):
-    OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / filename
-    fig.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-    print(filename)
 
 def bubble_size(n):
-    return 60 + 38 * np.log10(n)
+    return 25 + 18 * np.log10(n)
 
-# ---------------------------------------------------------------- Figure: predictor heat-grid
-def predictor_grid():
-    # Compact domains keep the figure legible at a journal's full-page width.
-    # A value of 1 means that at least one predictor in the domain is used.
-    preds = ["Current age / sex", "Blood pressure", "Lipids", "Smoking",
-             "Duration / onset", "HbA1c", "Renal", "Retinopathy",
-             "BP / lipid treatment", "Other"]
-    models = {
-        # T1D-specific
-        "Cederholm 2011 (T1D)":       "_,1,1,1,1,1,1,_,_,1",
-        "Steno 2016 (T1D)":           "1,1,1,1,1,1,1,_,_,1",
-        "EURODIAB 2014 (T1D)":        "1,_,1,_,_,1,1,_,_,1",
-        "Scottish–Swedish 2021 (T1D)":"1,1,1,1,1,1,1,1,1,1",
-        "LIFE-T1D 2024 (T1D)":        "1,1,1,1,1,1,1,1,_,1",
-        # candidate T2D / general
-        "SCORE2-Diabetes 2023 (T2D)":"1,1,1,1,1,1,1,_,_,_",
-        "DIAL 2019 (T2D)":           "1,1,1,1,1,1,1,_,_,1",
-        "ADVANCE 2011 (T2D)":        "1,1,1,_,1,1,1,1,1,1",
-        "UKPDS (T2D)":               "1,1,1,1,1,1,_,_,_,1",
-        "SCORE2 2021 (gen.)":        "1,1,1,1,_,_,_,_,_,_",
-        "PCE 2013 (gen.)":           "1,1,1,1,_,_,_,_,1,1",
-        "PREVENT base 2024 (gen.)":  "1,1,1,1,_,_,1,_,1,_",
-        "QRISK3 2017 (gen.)":        "1,1,1,1,_,_,1,_,1,1",
-        "Framingham 2008 (gen.)":    "1,1,1,1,_,_,_,_,1,_",
-    }
-    names = list(models)
-    tokens = [[x.strip() for x in v.split(",")] for v in models.values()]
-    M = np.array([[0.5 if "?" in x else 1 if x == "1" else 0 for x in row] for row in tokens])
-    fig, ax = plt.subplots(figsize=(11.8, 7.2))
-    cmap = matplotlib.colors.ListedColormap(["#f3f3f3", "#9ecae1", "#2166ac"])
-    norm = matplotlib.colors.BoundaryNorm([-0.1, 0.25, 0.75, 1.1], cmap.N)
-    ax.imshow(M, cmap=cmap, norm=norm, aspect="auto")
-    ax.set_xticks(range(len(preds))); ax.set_xticklabels(preds, rotation=55, ha="right", fontsize=8)
-    ax.set_yticks(range(len(names))); ax.set_yticklabels(names, fontsize=8.5)
-    for i in range(len(names) + 1): ax.axhline(i - 0.5, color="white", lw=1)
-    for j in range(len(preds) + 1): ax.axvline(j - 0.5, color="white", lw=1)
-    ax.axhline(4.5, color="black", lw=2)  # T1D | candidate separator
-    ax.set_xlim(-2.25, len(preds) - 0.5)
-    ax.axvline(-0.5, color="#d9d9d9", lw=1.2)
 
-    def group_bracket(y0, y1, label, color):
-        x = -1.25
-        ax.plot([x, x], [y0 - 0.38, y1 + 0.38], color=color, lw=1.5, clip_on=False)
-        ax.plot([x, -0.65], [y0 - 0.38, y0 - 0.38], color=color, lw=1.5, clip_on=False)
-        ax.plot([x, -0.65], [y1 + 0.38, y1 + 0.38], color=color, lw=1.5, clip_on=False)
-        ax.text(-1.73, (y0 + y1) / 2, label, rotation=90, va="center", ha="center",
-                fontsize=9, fontweight="bold", color=color)
-
-    group_bracket(0, 4, "T1D-specific", T1D_C)
-    group_bracket(5, len(names) - 1, "candidate T2D / general", T2D_C)
-    ax.set_title("Predictors used by each cardiovascular risk calculator", fontsize=12, pad=10)
-    fig.text(0.5, 0.005, "Filled = at least one predictor in the domain. Other includes BMI, AF, prior CVD, deprivation, ethnicity, or exercise; diabetes status/type is not shown as a separate domain. "
-             "Cederholm has no explicit current-age/sex term (age is used to derive onset age). None uses CGM time in range, hypoglycaemia exposure, autonomic neuropathy, or insulin-delivery modality.", ha="center", fontsize=7.2, style="italic")
-    fig.tight_layout(rect=[0.03, 0.03, 1, 1])
-    save_figure(fig, "fig_predictor_grid.png")
-
-# ---------------------------------------------------------------- Figure: model timeline
 def timeline():
-    # (name, year, cohort_n, type, horizon)
-    M = [("Pittsburgh EDC", 2010, 603, "T1D", "10y"), ("Cederholm NDR", 2011, 3661, "T1D", "5y"),
-         ("EURODIAB", 2014, 1973, "T1D", "7y"), ("Steno T1", 2016, 4306, "T1D", "5/10y"),
-         ("Scottish–Swedish", 2021, 27527, "T1D", "10y"), ("LIFE-T1D", 2024, 39756, "T1D", "10y/life"),
-         ("UKPDS", 2001, 4540, "T2D", "—"), ("ADVANCE", 2011, 7168, "T2D", "4y"),
-         ("DIAL", 2019, 389366, "T2D", "10y/life"), ("SCORE2-Diabetes", 2023, 229460, "T2D", "10y"),
-         ("Framingham gen.", 2008, 8491, "general", "10y"), ("PCE", 2013, 24626, "general", "10y"),
-         ("QRISK3", 2017, 7800000, "general", "10y"), ("SCORE2", 2021, 677684, "general", "10y"),
-         ("PREVENT", 2024, 3281919, "general", "10/30y")]
-    fig, ax = plt.subplots(figsize=(12, 5.5))
-    lanes = {"T1D": 2, "T2D": 1, "general": 0}
-    label_layout = {
-        "Pittsburgh EDC": (0.04, 0, 10),
-        "Cederholm NDR": (0.10, 0, -18),
-        "EURODIAB": (-0.09, 0, 10),
-        "Steno T1": (0.07, 0, -18),
-        "Scottish–Swedish": (-0.06, -8, 11),
-        "LIFE-T1D": (0.10, 12, -18),
-        "UKPDS": (-0.07, 0, -18),
-        "ADVANCE": (0.07, 0, 10),
-        "DIAL": (-0.08, 0, -18),
-        "SCORE2-Diabetes": (0.08, 0, 10),
-        "Framingham gen.": (0.05, 0, 10),
-        "PCE": (-0.08, 0, -18),
-        "QRISK3": (0.07, 0, 10),
-        "SCORE2": (-0.08, -4, -18),
-        "PREVENT": (0.09, 10, 10),
+    fig, ax = plt.subplots(figsize=(WIDTH, 4.45))
+    # Vertical staggering has no quantitative meaning; year is the x coordinate.
+    layouts = {
+        'Pittsburgh EDC': (2.12, -3, 11, 'right'),
+        'Cederholm NDR': (1.92, 0, -22, 'center'),
+        'EURODIAB': (2.15, 0, 11, 'center'),
+        'Steno T1': (1.92, 0, -22, 'center'),
+        'Scottish–Swedish': (2.15, -2, 11, 'right'),
+        'LIFE-T1D': (1.92, 1, -22, 'center'),
+        'UKPDS CHD': (.93, 0, -22, 'center'),
+        'ADVANCE': (1.1, 0, 11, 'center'),
+        'DIAL': (.93, 0, -22, 'center'),
+        'SCORE2-Diabetes': (1.12, 7, 11, 'center'),
+        'Framingham': (.12, 0, 11, 'center'),
+        'PCE': (-.08, 0, -22, 'center'),
+        'QRISK3': (.12, 0, 11, 'center'),
+        'SCORE2': (-.08, -3, -22, 'center'),
+        'PREVENT': (.12, 2, 11, 'center'),
     }
-    for name, yr, n, typ, hz in M:
-        y_jitter, x_offset, y_offset = label_layout[name]
-        y = lanes[typ] + y_jitter
-        ax.scatter(yr, y, s=bubble_size(n), color=CTYPE[typ], alpha=0.75, edgecolor="white", zorder=3)
-        ax.annotate(f"{name}\n({hz})", (yr, y), fontsize=7, ha="center",
-                    va="bottom" if y_offset > 0 else "top",
-                    xytext=(x_offset, y_offset), textcoords="offset points")
-    ax.set_yticks([0, 1, 2]); ax.set_yticklabels(["General population", "Type 2 diabetes", "Type 1 diabetes"], fontsize=10)
-    ax.set_xlim(2000, 2027); ax.set_ylim(-0.6, 2.6); ax.set_xlabel("Year of publication", fontsize=10)
-    ax.set_title("Landscape of cardiovascular risk models relevant to type 1 diabetes", fontsize=12)
-    size_handles = [
-        Line2D([0], [0], marker="o", linestyle="", markerfacecolor="#d9d9d9", markeredgecolor="#666666",
-               markersize=np.sqrt(bubble_size(n)), label=label)
-        for n, label in [(1_000, "1k"), (100_000, "100k"), (10_000_000, "10M")]
-    ]
-    ax.legend(handles=size_handles, title="Derivation cohort n", loc="lower left",
-              bbox_to_anchor=(0.01, 0.02), fontsize=7.5, title_fontsize=8, frameon=False,
-              handletextpad=1.2, borderpad=0.2)
-    for sp in ["top", "right"]: ax.spines[sp].set_visible(False)
-    ax.grid(axis="x", alpha=0.3)
-    fig.tight_layout()
-    save_figure(fig, "fig_model_timeline.png")
+    for r in DATA['timeline']:
+        y, dx, dy, ha = layouts[r['model']]
+        ax.scatter(r['year'], y, s=bubble_size(r['n']), color=CTYPE[r['type']], edgecolor='white', lw=.6, zorder=3)
+        ax.annotate(r['model'], (r['year'], y), xytext=(dx,dy), textcoords='offset points', ha=ha,
+                    va='bottom' if dy>0 else 'top', fontsize=7.5)
+    ax.set_yticks([0,1,2], labels=['General / mixed', 'Type 2 diabetes', 'Type 1 diabetes'])
+    ax.tick_params(axis='y', length=0)
+    ax.set_xlim(1999,2027); ax.set_ylim(-.72,2.72)
+    ax.set_xticks([2000,2005,2010,2015,2020,2025]); ax.set_xlabel('Publication year')
+    ax.grid(axis='x', alpha=.22, lw=.5)
+    for y in [.5,1.5]: ax.axhline(y, color='#dddddd', lw=.5)
+    for sp in ['top','right','left']: ax.spines[sp].set_visible(False)
+    handles=[Line2D([],[],marker='o',ls='',markerfacecolor='#cccccc',markeredgecolor='#777777',
+                    markersize=np.sqrt(bubble_size(n)),label=lab) for n,lab in [(1000,'1,000'),(100000,'100,000'),(10000000,'10,000,000')]]
+    ax.legend(handles=handles, title='Derivation cohort size (log-scaled symbols)', loc='upper center', bbox_to_anchor=(.5,1.10),
+              ncol=3, fontsize=7.5, title_fontsize=8, frameon=False, columnspacing=1.3)
+    fig.subplots_adjust(left=.205,right=.985,bottom=.125,top=.87)
+    save_figure(fig,'fig_model_timeline.png')
 
-# ---------------------------------------------------------------- Figure: C-statistic forest plot
+
 def cstat_forest():
-    # Horizontal spans are reported derivation/validation or sex-specific
-    # values, not confidence intervals. Pooled rows are point estimates.
-    rows = [("Cederholm 2011", 0.815, 0.80, 0.83, "T1D"),
-            ("Steno 2016 (5-year)", 0.815, 0.803, 0.826, "T1D"),
-            ("Pittsburgh EDC 2010", 0.775, 0.77, 0.78, "T1D"),
-            ("EURODIAB 2014", 0.775, 0.73, 0.82, "T1D"),
-            ("Scottish–Swedish 2021", 0.835, 0.82, 0.85, "T1D"),
-            ("LIFE-T1D 2024", 0.79, 0.73, 0.85, "T1D"),
-            ("Pooled T1D-specific (Erqou)", 0.81, 0.81, 0.81, "T1D"),
-            ("QRISK3 external T1D validation", 0.842, 0.830, 0.853, "general"),
-            ("Pooled general/T2D (Erqou)", 0.75, 0.75, 0.75, "general")]
-    fig, ax = plt.subplots(figsize=(8.8, 6))
-    ys = list(range(len(rows))[::-1])
-    for y, (name, c, lo, hi, typ) in zip(ys, rows):
-        pooled = "Pooled" in name
-        ax.plot([lo, hi], [y, y], color=CTYPE[typ], lw=2.2 if pooled else 1.4, alpha=0.9)
-        if pooled:
-            ax.scatter(c, y, marker="D", s=90, color=CTYPE[typ],
-                       edgecolor="black", zorder=3, linewidth=0.6)
-        else:
-            ax.plot([lo, lo], [y - 0.05, y + 0.05], color=CTYPE[typ], lw=1.2)
-            ax.plot([hi, hi], [y - 0.05, y + 0.05], color=CTYPE[typ], lw=1.2)
-    ax.axvline(0.81, color=T1D_C, ls="--", lw=0.8, alpha=0.6); ax.axvline(0.75, color=GEN_C, ls="--", lw=0.8, alpha=0.6)
-    ax.set_xlim(0.65, 0.90)
-    ax.set_ylim(-0.75, len(rows) - 0.25)
-    ax.set_yticks(ys); ax.set_yticklabels([r[0] for r in rows], fontsize=8.5)
-    for tick, row in zip(ax.get_yticklabels(), rows):
-        if "Pooled" in row[0]:
-            tick.set_fontweight("bold")
-    ax.tick_params(axis="y", length=0, pad=6)
-    ax.set_xlabel("C-statistic (discrimination) in type 1 diabetes", fontsize=10)
-    ax.set_title("Reported discrimination of cardiovascular risk models in type 1 diabetes", fontsize=11.5)
-    ax.legend(handles=[Patch(color=T1D_C, label="T1D-specific"), Patch(color=T2D_C, label="T2D"),
-                       Patch(color=GEN_C, label="General")], loc="lower right", fontsize=8.5, frameon=False)
-    for sp in ["top", "right", "left"]: ax.spines[sp].set_visible(False)
-    fig.text(0.5, 0.005, "Horizontal spans show reported derivation/validation or sex-specific C-statistics, not confidence intervals; pooled diamonds show point estimates. QRISK3: Livingstone 2021.",
-             ha="center", fontsize=7, style="italic")
-    fig.tight_layout(rect=[0, 0.02, 1, 1])
-    save_figure(fig, "fig_cstat_forest.png")
+    # Separate published estimates: no invented midpoint, no range presented as CI.
+    rows=DATA['discrimination']
+    fig, ax=plt.subplots(figsize=(WIDTH,6.45))
+    y=len(rows)-1
+    ticks=[]; labels=[]
+    marker={'development':'s','external':'o','pooled':'D'}
+    for r in rows:
+        ticks.append(y); labels.append(r['label'])
+        c=CTYPE[r['type']]
+        ax.scatter(r['value'],y,marker=marker[r['stage']],s=27,color=c,edgecolor='white',lw=.35,zorder=3)
+        ax.text(.913,y,format(r['value'], '.3f' if r['source']=='05' else '.2f'),ha='right',va='center',fontsize=7.5)
+        y-=1
+        if r.get('separator_after'): ax.axhline(y+.5,color='#cccccc',lw=.6)
+    ax.set_yticks(ticks,labels=labels); ax.tick_params(axis='y',length=0,pad=4)
+    ax.set_xlim(.65,.92);ax.set_ylim(-.7,len(rows)-.3)
+    ax.set_xticks([.65,.70,.75,.80,.85,.90]); ax.set_xlabel('Reported C-statistic')
+    ax.grid(axis='x',color='#e8e8e8',lw=.5)
+    fig.legend(handles=[Line2D([],[],marker=m,ls='',color='#444444',label=l,markersize=5) for m,l in
+                       [('s','Development / internal'),('o','External'),('D','Pooled')]],
+              loc='upper center',bbox_to_anchor=(.5,.995),ncol=3,fontsize=7.5,frameon=False)
+    for sp in ['top','right','left']:ax.spines[sp].set_visible(False)
+    fig.subplots_adjust(left=.455,right=.975,bottom=.085,top=.925)
+    save_figure(fig,'fig_cstat_forest.png')
 
-# ---------------------------------------------------------------- Figure: per-tool 10-yr risk distribution
+
 def risk_distributions():
-    cohort = make_synthetic_cohort(10000)
-    models = analysis_models()
-    data, colors, labels = [], [], []
-    ukpds_stats = None
-    for m in models:
-        r = np.array([REGISTRY[m][2](p) for p in cohort], float)
-        r = r[np.isfinite(r)]
-        if m == "UKPDS-CVD":
-            ukpds_stats = (float(np.median(r)), float(np.mean(r)))
-            continue
-        data.append(r); colors.append(CTYPE[REGISTRY[m][0]]); labels.append(f"{m} (n={len(r):,})")
-    order = np.argsort([np.median(d) for d in data])
-    data = [data[i] for i in order]; colors = [colors[i] for i in order]; labels = [labels[i] for i in order]
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bp = ax.boxplot(data, vert=False, patch_artist=True, showfliers=False, widths=0.6)
-    for patch, c in zip(bp["boxes"], colors): patch.set_facecolor(c); patch.set_alpha(0.7)
-    for med in bp["medians"]: med.set_color("black")
-    ax.set_yticklabels(labels, fontsize=9)
-    threshold_specs = [(10, "10% analytic boundary", "green", "--"), (20, "20% analytic boundary", "orange", "-.")]
-    for x, label, color, ls in threshold_specs:
-        ax.axvline(x, color=color, ls=ls, lw=1.0, alpha=0.75)
-        ax.text(x + 1.0, len(data) + 0.45, label, color=color, fontsize=8, va="center", ha="left")
-    ax.set_xlabel("Predicted 10-year risk (%) among profiles eligible for each model", fontsize=10)
-    ax.set_title("Predicted-risk distributions in the seeded synthetic cohort\n(main axis excludes the structurally implausible UKPDS outlier)", fontsize=11.5)
-    if ukpds_stats:
-        ax.text(0.995, 0.08,
-                f"UKPDS-CVD treated as outlier: median {ukpds_stats[0]:.0f}%, mean {ukpds_stats[1]:.0f}%\n"
-                "from extrapolating a newly diagnosed T2D duration term",
-                transform=ax.transAxes, ha="right", va="bottom", fontsize=8,
-                color="#7a1f2c",
-                bbox=dict(boxstyle="round,pad=0.35", facecolor="#fff4f1", edgecolor="#d6a0a7", linewidth=0.8))
-    # Figure 5 is read primarily by row labels; omitting a legend keeps the
-    # UKPDS outlier note from competing with the main distribution panel.
-    for sp in ["top", "right"]: ax.spines[sp].set_visible(False)
-    ax.set_xlim(0, 40)
-    ax.set_ylim(0.5, len(data) + 0.7)
-    fig.text(0.5, 0.005, "Rows use model-specific eligible subsets and tool-specific endpoints; risk percentages are therefore not directly interchangeable.",
-             ha="center", fontsize=7.2, style="italic")
-    fig.tight_layout(rect=[0, 0.04, 1, 1])
-    save_figure(fig, "fig_risk_distributions.png")
+    # Use the exact frozen evaluation CSV also underlying Figure 4.
+    risks=pd.read_csv(DEFAULT_OUT/'cohort_risks.csv')
+    types=DATA['analysis_types']
+    models=list(types)
+    data={m:risks[m].dropna().to_numpy() for m in models}
+    order=sorted(models,key=lambda m:np.median(data[m]))
+    fig,ax=plt.subplots(figsize=(WIDTH,4.25))
+    bp=ax.boxplot([data[m] for m in order],vert=False,patch_artist=True,showfliers=False,widths=.56)
+    for patch,m in zip(bp['boxes'],order):patch.set_facecolor(CTYPE[types[m]]);patch.set_alpha(.8)
+    for med in bp['medians']:med.set_color('black');med.set_linewidth(1)
+    ax.set_yticks(range(1,len(order)+1),labels=[f"{DATA['analysis_labels'][m]} (n={len(data[m]):,})" for m in order])
+    for x,ls in [(10,'--'),(20,'-.')]:ax.axvline(x,color='#555555',ls=ls,lw=.7)
+    ax.set_xlim(0,100);ax.set_xticks(range(0,101,20));ax.set_xlabel('Predicted 10-year risk (%)')
+    ax.set_ylim(.4,len(order)+.7)
+    ax.legend(handles=[Patch(facecolor=c,label=l) for c,l in [(T1D_C,'T1D-specific'),(T2D_C,'T2D'),(GEN_C,'General / mixed')]],
+              loc='lower center',bbox_to_anchor=(.35,1.025),ncol=3,frameon=False,fontsize=7.5)
+    for sp in ['top','right']:ax.spines[sp].set_visible(False)
+    fig.subplots_adjust(left=.365,right=.975,bottom=.13,top=.90)
+    save_figure(fig,'fig_risk_distributions.png')
 
-
-if __name__ == "__main__":
-    predictor_grid(); timeline(); cstat_forest(); risk_distributions()
-    print("all companion figures written to", OUT)
+if __name__=='__main__':
+    timeline();predictor_grid();cstat_forest();risk_distributions()

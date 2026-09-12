@@ -1,15 +1,17 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite this release and the associated manuscript."
-title: "T1D-CVD risk calculators: reproducible agreement analysis and open comparison tool"
+message: "Please cite the archived software version used and the associated manuscript."
+title: "Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison"
 type: software
 authors:
   - family-names: "Liegertová"
     given-names: "Michaela"
-version: 1.0.0
-date-released: 2026-07-10
+version: 2.0.0
 repository-code: "https://github.com/MichaLie/t1d-cvd-risk-calculators"
 url: "https://michalie.github.io/t1d-cvd-risk-calculators/metatool/"
-license: MIT
+license:
+  - MIT
+  - LGPL-3.0-or-later
+  - CC-BY-4.0
 keywords:
   - type 1 diabetes
   - cardiovascular risk

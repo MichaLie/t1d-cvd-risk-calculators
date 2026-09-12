@@ -26,13 +26,12 @@ Statin treatment,No,Fixed default
 Family history of CVD,No,Fixed default
 Ethnicity,White,Fixed default
 SCORE2 region,High-risk region,Fixed to Central European/Czech setting
-Scottish deprivation,Quintile 3,Fixed in model adapter
 Common analytic bands,"<10%, 10 to <20%, and >=20%; not native treatment thresholds",Analysis choice
 Mean kappa,Unweighted mean of finite pairwise-complete linear-weighted kappas; pairs with n<30 or identical single-category marginals are excluded,Analysis choice
-Randomisation and robustness,Single seed 20260613 and one prespecified generator parameter set; no repeated-seed or distribution-perturbation analysis,Analysis limitation
+Randomisation and robustness,"Primary seed 20260613; additional seeds 20260613..20260617, common age support, LDL/duration exclusions, model subsets and factorial grid reported by eval.robustness; no fitted registry distribution",Analysis limitation
 Verified runtime,Python 3.12.0; NumPy 2.2.6; pandas 2.3.3; SciPy 1.16.3; Matplotlib 3.10.8; Node 22.14.0,Environment snapshot
 QRISK3 adapter,Townsend score 0; current smoking mapped to category 2; SBP variability raw input 0; other comorbidities off,Documented adaptation
-Scottish-Swedish adapter,Current smoking proxies ever-smoking; sex-default height and BMI-derived weight; current HbA1c proxies mean HbA1c; SIMD quintile 3; fitted x1.32 calibration,Documented adaptation
 ADVANCE adapter,Albuminuria mapped to ACR 10/100/500 mg/g; native 4-year risk extrapolated to 10 years under constant hazard,Documented adaptation
-UKPDS adapter,CHD and stroke combined using an independence approximation,Documented adaptation
+UKPDS adapter,Age entered as age at diagnosis (UKPDS definition) with duration separately through d^T; stroke lipid term linear in TC:HDL (Kothari 2002); CHD and stroke combined using an independence approximation,Documented adaptation
+SCORE2 adapter,"Run as deployed for people without diabetes, i.e. its published diabetes term set to 0 (Hageman 2022 footnote a); published-term variant reported in sensitivity_model_variants.csv",Documented adaptation
 Cederholm endpoint,Native 5-year endpoint is available in the browser but excluded from the 10-year agreement matrix,Horizon rule

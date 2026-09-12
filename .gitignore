@@ -1,9 +1,24 @@
 __pycache__/
-*.pyc
+*.py[cod]
 .DS_Store
+.venv/
 node_modules/
-.npmcache/
 *.egg-info/
 .ipynb_checkpoints/
-eval/out/workbook_preview/
-eval/out/*.xlsx
+# Generated per-profile and pair-level data; reproduce with python -m eval.verify.
+eval/out/*
+!eval/out/README.md
+!eval/out/kappa_matrix.csv
+!eval/out/sensitivity_summary.csv
+!eval/out/sensitivity_model_summary.csv
+!eval/out/sensitivity_model_variants.csv
+!eval/out/synthetic_cohort_assumptions.csv
+!eval/out/robustness_summary.csv
+# Reading aids and intermediate exports are not release assets.
+audit/
+qa/
+*.xlsx
+*.zip
+submission_figures/*.svg
+submission_figures/qa/
+submission_figures/data/

@@ -18,7 +18,7 @@ B = {
 def framingham_risk(*, female: bool, age: float, total_chol_mgdl: float, hdl_mgdl: float,
                     sbp: float, treated_bp: bool, smoker: bool, diabetes: bool) -> float:
     """10-yr general-CVD risk (%). Reasonable range age 30-74 -> NaN outside."""
-    if not (30 <= age <= 74):
+    if not (30 <= age < 75):
         return float("nan")
     b = B["female" if female else "male"]
     lp = (b["ln_age"] * log(age) + b["ln_tc"] * log(total_chol_mgdl) + b["ln_hdl"] * log(hdl_mgdl)

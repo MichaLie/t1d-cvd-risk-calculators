@@ -28,7 +28,7 @@ def prevent_risk(*, female: bool, age: float, total_chol: float, hdl: float, sbp
                  egfr: float, diabetes: bool, smoker: bool, treated_bp: bool = False,
                  statin: bool = False) -> float:
     """10-yr total-CVD risk (%). total_chol/hdl in mmol/L. NaN outside 30-79."""
-    if not (30 <= age <= 79):
+    if not (30 <= age < 80):
         return float("nan")
     b = B["female" if female else "male"]
     nonhdl = (total_chol - hdl) - 3.5

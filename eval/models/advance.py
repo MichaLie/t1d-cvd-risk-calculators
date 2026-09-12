@@ -1,8 +1,8 @@
 """
 ADVANCE risk score (Kengne 2011), T2D 4-yr major-CVD Cox model, mean-centered.
 risk_4yr = 1 - S0(4)^exp(LP - meanLP); S0(4)=0.951044, meanLP=6.5267 (reconstructed).
-10-yr via U-Prevent extrapolation: 1-(1-risk4)^2.5 (constant-hazard assumption).
-Mean-covariate patient reproduces 1-S0 = 4.90% exactly.
+10-yr exploratory extrapolation: 1-(1-risk4)^2.5 (constant-hazard assumption).
+The baseline-survival identity is an internal check, not independent validation.
 """
 from __future__ import annotations
 from math import exp, log

@@ -13,7 +13,7 @@ import pandas as pd
 
 from eval.harness.categories import band
 from eval.harness.discordance import cohen_kappa
-from eval.harness.models import REGISTRY, analysis_models
+from eval.harness.models import REGISTRY, analysis_models, _score2
 from eval.harness.profiles import make_synthetic_cohort
 
 
@@ -129,10 +129,6 @@ def main():
                 pair_values.append(value)
                 pair_sample_sizes.append(pair_n)
 
-        steno_scottish, n_steno_scottish, exact_steno_scottish = pair_kappa(
-            cats["Steno-CVD"], cats["Scottish-Swedish"],
-            risks["Steno-CVD"], risks["Scottish-Swedish"], mask,
-        )
         steno_score2d, n_steno_score2d, exact_steno_score2d = pair_kappa(
             cats["Steno-IHDstroke"], cats["SCORE2-Diabetes"],
             risks["Steno-IHDstroke"], risks["SCORE2-Diabetes"], mask,
@@ -144,9 +140,6 @@ def main():
             "mean_pairwise_linear_weighted_kappa": float(np.mean(pair_values)) if pair_values else np.nan,
             "n_model_pairs_estimable": len(pair_values),
             "minimum_pairwise_n": min(pair_sample_sizes) if pair_sample_sizes else 0,
-            "steno_cvd_vs_scottish_swedish_kappa": steno_scottish,
-            "steno_cvd_vs_scottish_swedish_n": n_steno_scottish,
-            "steno_cvd_vs_scottish_swedish_exact_agreement_percent": 100 * exact_steno_scottish,
             "steno_ihdstroke_vs_score2_diabetes_kappa": steno_score2d,
             "steno_ihdstroke_vs_score2_diabetes_n": n_steno_score2d,
             "steno_ihdstroke_vs_score2_diabetes_exact_agreement_percent": 100 * exact_steno_score2d,
@@ -172,6 +165,36 @@ def main():
 
     pd.DataFrame(summary_rows).to_csv(OUT / "sensitivity_summary.csv", index=False)
     pd.DataFrame(model_rows).to_csv(OUT / "sensitivity_model_summary.csv", index=False)
+
+    # ---- Model-specification variants (full cohort) ------------------------------------
+    variants = {
+        "SCORE2 (as deployed, diabetes term 0; primary)": ("SCORE2", risks["SCORE2"]),
+        "SCORE2 (published diabetes term applied)": ("SCORE2", np.array([_score2(p, diabetes_term=True) for p in cohort], float)),
+    }
+    full = masks["Full seeded cohort"]
+    variant_rows = []
+    for label, (primary_name, r) in variants.items():
+        c = np.array([band(x) if np.isfinite(x) else -1 for x in r])
+        fin = np.isfinite(r)
+        k_steno, n_steno, ex_steno = pair_kappa(cats["Steno-CVD"], c, risks["Steno-CVD"], r, full)
+        k_s2d, n_s2d, ex_s2d = pair_kappa(cats["SCORE2-Diabetes"], c, risks["SCORE2-Diabetes"], r, full)
+        k_prim, n_prim, ex_prim = pair_kappa(cats[primary_name], c, risks[primary_name], r, full)
+        variant_rows.append({
+            "variant": label,
+            "n_scored": int(fin.sum()),
+            "mean_risk_percent": float(np.mean(r[fin])),
+            "median_risk_percent": float(np.median(r[fin])),
+            "band_lt10_n": int((c[fin] == 0).sum()),
+            "band_10_to_lt20_n": int((c[fin] == 1).sum()),
+            "band_ge20_n": int((c[fin] == 2).sum()),
+            "kappa_vs_steno_cvd": k_steno, "n_vs_steno_cvd": n_steno,
+            "exact_agreement_vs_steno_cvd_percent": 100 * ex_steno,
+            "kappa_vs_score2_diabetes": k_s2d, "n_vs_score2_diabetes": n_s2d,
+            "exact_agreement_vs_score2_diabetes_percent": 100 * ex_s2d,
+            "kappa_vs_primary_specification": k_prim,
+            "exact_agreement_vs_primary_specification_percent": 100 * ex_prim,
+        })
+    pd.DataFrame(variant_rows).to_csv(OUT / "sensitivity_model_variants.csv", index=False)
 
     duration_one_n = int(np.sum(np.isclose(cohort_df["diabetes_duration_years"], 1.0)))
     assumptions = [
@@ -202,15 +225,14 @@ def main():
         ("Family history of CVD", "No", "Fixed default"),
         ("Ethnicity", "White", "Fixed default"),
         ("SCORE2 region", "High-risk region", "Fixed to Central European/Czech setting"),
-        ("Scottish deprivation", "Quintile 3", "Fixed in model adapter"),
         ("Common analytic bands", "<10%, 10 to <20%, and >=20%; not native treatment thresholds", "Analysis choice"),
         ("Mean kappa", "Unweighted mean of finite pairwise-complete linear-weighted kappas; pairs with n<30 or identical single-category marginals are excluded", "Analysis choice"),
-        ("Randomisation and robustness", "Single seed 20260613 and one prespecified generator parameter set; no repeated-seed or distribution-perturbation analysis", "Analysis limitation"),
+        ("Randomisation and robustness", "Primary seed 20260613; additional seeds 20260613..20260617, common age support, LDL/duration exclusions, model subsets and factorial grid reported by eval.robustness; no fitted registry distribution", "Analysis limitation"),
         ("Verified runtime", "Python 3.12.0; NumPy 2.2.6; pandas 2.3.3; SciPy 1.16.3; Matplotlib 3.10.8; Node 22.14.0", "Environment snapshot"),
         ("QRISK3 adapter", "Townsend score 0; current smoking mapped to category 2; SBP variability raw input 0; other comorbidities off", "Documented adaptation"),
-        ("Scottish-Swedish adapter", "Current smoking proxies ever-smoking; sex-default height and BMI-derived weight; current HbA1c proxies mean HbA1c; SIMD quintile 3; fitted x1.32 calibration", "Documented adaptation"),
         ("ADVANCE adapter", "Albuminuria mapped to ACR 10/100/500 mg/g; native 4-year risk extrapolated to 10 years under constant hazard", "Documented adaptation"),
-        ("UKPDS adapter", "CHD and stroke combined using an independence approximation", "Documented adaptation"),
+        ("UKPDS adapter", "Age entered as age at diagnosis (UKPDS definition) with duration separately through d^T; stroke lipid term linear in TC:HDL (Kothari 2002); CHD and stroke combined using an independence approximation", "Documented adaptation"),
+        ("SCORE2 adapter", "Run as deployed for people without diabetes, i.e. its published diabetes term set to 0 (Hageman 2022 footnote a); published-term variant reported in sensitivity_model_variants.csv", "Documented adaptation"),
         ("Cederholm endpoint", "Native 5-year endpoint is available in the browser but excluded from the 10-year agreement matrix", "Horizon rule"),
     ]
     pd.DataFrame(assumptions, columns=["variable", "implementation", "status"]).to_csv(

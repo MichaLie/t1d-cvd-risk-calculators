@@ -19,6 +19,8 @@
   .wrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px}
   .grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .grid>div{min-width:0}
+  .table-scroll{max-width:100%;overflow-x:auto}
   .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px}
   .card h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 12px}
   label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
@@ -43,11 +45,15 @@
   .pill.low{background:var(--low)} .pill.mod{background:var(--mod)} .pill.high{background:var(--high)}
   .flag{border-left:4px solid var(--warn);background:#fff7ea;padding:10px 14px;border-radius:6px;margin:6px 0 16px;font-size:13.5px}
   .flag.ok{border-color:var(--low);background:#eefaf0}
+  .flag.err{border-color:var(--high);background:#fdecec}
+  .flag ul{margin:4px 0 0 18px;padding:0}
+  .bar-caution{font-size:11px;color:var(--warn);margin:-2px 0 4px 158px}
+  @media(max-width:900px){.bar-caution{margin-left:0}}
   .summary{font-size:14px;margin:0 0 10px}
   details{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
   summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--t1d)}
   .meth{font-size:12.5px;color:var(--muted)}
-  .meth table{width:100%;border-collapse:collapse;margin-top:8px}
+  .meth table{min-width:640px;width:100%;border-collapse:collapse;margin-top:8px}
   .meth td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:top}
   .disc{font-size:12px;color:var(--muted);max-width:880px}
   .tag{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
@@ -59,7 +65,7 @@
 <body>
 <header>
   <h1>Type 1 Diabetes — Cardiovascular Risk Meta-Calculator</h1>
-  <p>Runs implemented published CV risk calculators side by side for an adult with type 1 diabetes, shows where their outputs agree and diverge, and permits transparent recalibration. <b>It is not a new prediction model</b> — every coefficient and adaptation is open in <code>models.js</code>, with implementation-check status reported per endpoint. For research and education only; not a validated clinical decision rule or regulated medical device.</p>
+  <p>Runs implemented published CV risk calculators side by side for an adult with type 1 diabetes, shows where their outputs agree and diverge, and permits explicit sensitivity scaling. <b>It is not a new prediction model</b> — model assumptions and implementation-check status are reported below. For research and education only; not a validated clinical decision rule or regulated medical device.</p>
 </header>
 <div class="wrap"><div class="grid">
 
@@ -68,40 +74,41 @@
     <div class="card">
       <h2>Patient</h2>
       <div class="row">
-        <div><label for="age">Age (years)</label><input type="number" id="age" value="45" min="18" max="90"></div>
+        <div><label for="age">Age (years)</label><input type="number" id="age" step="any" value="45" min="18" max="90"></div>
         <div><label for="sex">Sex</label><select id="sex"><option value="female">Female</option><option value="male" selected>Male</option></select></div>
       </div>
       <div class="row">
-        <div><label for="duration">Diabetes duration (y)</label><input type="number" id="duration" value="20" min="0" max="70"></div>
-        <div><label for="onset">Age at onset</label><input type="number" id="onset" value="25" min="0" max="80"></div>
+        <div><label for="duration">Diabetes duration (y)</label><input type="number" id="duration" step="any" value="20" min="0" max="80"></div>
+        <div><label for="onset">Age at onset (derived)</label><input type="number" id="onset" value="25" min="0" max="90" readonly></div>
       </div>
-      <label for="ethnicity">Ethnicity (PCE/QRISK3)</label>
-      <select id="ethnicity"><option value="white" selected>White / other</option><option value="black">Black</option><option value="south_asian">South Asian</option></select>
+      <label for="ethnicity">Ethnicity (simplified PCE/QRISK3/UKPDS mapping)</label>
+      <select id="ethnicity"><option value="white" selected>White</option><option value="black">Black (QRISK3 Caribbean / UKPDS Afro-Caribbean proxy)</option><option value="south_asian">South Asian (QRISK3 Indian proxy)</option><option value="other">Other</option></select>
 
       <h2 style="margin-top:16px">Measurements</h2>
       <div class="row">
-        <div><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" value="8.0" step="0.1" min="5" max="15"></div>
-        <div><label for="hba1cmmol">HbA1c (mmol/mol)</label><input type="number" id="hba1cmmol" value="64" step="1" min="30" max="140"></div>
+        <div><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" value="8.0" step="0.1" min="4" max="20"></div>
+        <div><label for="hba1cmmol">HbA1c (mmol/mol)</label><input type="number" id="hba1cmmol" value="64" step="1" min="20.21865" max="195.08265"></div>
       </div>
       <div class="row">
-        <div><label for="sbp">Systolic BP (mmHg)</label><input type="number" id="sbp" value="130" min="90" max="220"></div>
-        <div><label for="dbp">Diastolic BP (mmHg)</label><input type="number" id="dbp" value="78" min="50" max="130"></div>
+        <div><label for="sbp">Systolic BP (mmHg)</label><input type="number" id="sbp" value="130" min="70" max="260"></div>
+        <div><label for="dbp">Diastolic BP (mmHg)</label><input type="number" id="dbp" value="78" min="30" max="160"></div>
       </div>
       <div class="row3">
         <div><label for="tc">Total chol (mmol/L)</label><input type="number" id="tc" value="4.8" step="0.1"></div>
         <div><label for="hdl">HDL (mmol/L)</label><input type="number" id="hdl" value="1.4" step="0.1"></div>
-        <div><label for="tg">Triglycerides</label><input type="number" id="tg" value="1.2" step="0.1"></div>
+        <div><label for="tg">TG (mmol/L)</label><input type="number" id="tg" value="1.2" step="0.1"></div>
       </div>
+      <label for="ldl">Measured LDL (mmol/L, optional; required if TG ≥4.5)</label>
+      <input type="number" id="ldl" value="" min="0" max="20" step="0.1" placeholder="Otherwise estimated from lipids">
       <div class="row">
-        <div><label for="egfr">eGFR (mL/min/1.73m²)</label><input type="number" id="egfr" value="95" min="10" max="150"></div>
+        <div><label for="egfr">eGFR (mL/min/1.73m²)</label><input type="number" id="egfr" value="95" min="2" max="200"></div>
         <div><label for="alb">Albuminuria</label><select id="alb"><option value="normal" selected>Normal</option><option value="micro">Micro</option><option value="macro">Macro</option></select></div>
       </div>
       <div class="row">
         <div><label for="bmi">BMI (kg/m²)</label><input type="number" id="bmi" value="25" step="0.1"></div>
-        <div><label for="height">Height (m or cm, for Scot-Swed)</label><input type="number" id="height" value="" step="0.01" placeholder="auto / 1.70 / 170"></div>
       </div>
       <div class="chk"><input type="checkbox" id="smoker"><label for="smoker" style="margin:0">Current smoker</label></div>
-      <div class="chk"><input type="checkbox" id="exercise" checked><label for="exercise" style="margin:0">Regular exercise (≥3.5 h/wk, Steno)</label></div>
+      <div class="chk"><input type="checkbox" id="exercise" checked><label for="exercise" style="margin:0">Regular physical activity (≥30 min/day, Steno)</label></div>
       <div class="chk"><input type="checkbox" id="bptx"><label for="bptx" style="margin:0">On BP-lowering treatment</label></div>
       <div class="chk"><input type="checkbox" id="statin"><label for="statin" style="margin:0">On a statin</label></div>
       <div class="chk"><input type="checkbox" id="af"><label for="af" style="margin:0">Atrial fibrillation</label></div>
@@ -112,7 +119,7 @@
       <h2 style="margin-top:16px">Calibration</h2>
       <label for="region">SCORE2 risk region (drives SCORE2 family)</label>
       <select id="region"><option value="low">Low</option><option value="moderate">Moderate</option><option value="high" selected>High (Central Europe, incl. Czechia)</option><option value="very_high">Very high</option></select>
-      <label for="oe">Local recalibration of T1D-specific tools — observed/expected ratio (optional)</label>
+      <label for="oe">Exploratory T1D cumulative-hazard multiplier (default 1)</label>
       <input type="number" id="oe" value="1.0" step="0.05" min="0.3" max="2">
       <div class="derived" id="derived" aria-live="polite"></div>
     </div>
@@ -133,10 +140,11 @@
       <details>
         <summary>Methods, implementation checks & coefficients</summary>
         <div class="meth">
-          <p>Each tool below is a transparent implementation of a published equation. The Node harness includes selected source-paper examples and tables, live-tool comparisons where available, and regression guards (41/41 checks pass; see <code>test_models.js</code>). These checks assess software implementation, not external clinical validity. Coefficients are open in <code>models.js</code>. The secondary Steno-IHD/stroke coefficients were checked against Vistisen 2016 Supplemental Table 4. This is an <b>agreement and comparison tool, not an accuracy study</b>: without outcomes it cannot establish which estimate is correct.</p>
-          <table id="methtable"></table>
-          <p style="margin-top:10px"><b>Recalibration.</b> The SCORE2 family uses its published risk-region mechanism. For the T1D-specific tools, an optional observed/expected ratio applies transparent cumulative-hazard scaling and should be used only with an appropriate local estimate. Default 1.0 means no additional user-supplied scaling; it does not certify published calibration.</p>
-          <p><b>Reproducibility note.</b> The Scottish–Swedish implementation uses the published final-model coefficients. The published coefficient table (Table 4) omits the age-at-entry term appearing in the final multivariable model; that term is restored here. A fitted ×1.32 constant aligns selected output from the deployed calculator because published cubic and interaction coefficients are rounded. Deprivation is fixed at quintile 3. This is a transparent reconstruction, not a coefficient-complete independent reproduction.</p>
+          <p>Each tool below is a transparent implementation of a published equation. The Node harness includes selected source-paper examples and tables, live-tool comparisons where available, and regression guards (see <code>test_models.js</code>); a cross-implementation parity check (<code>parity_check.js</code>) confirms that this browser engine reproduces the manuscript pipeline on all 10,000 synthetic profiles. These checks assess software implementation, not external clinical validity. Coefficients are supplied in <code>models.js</code> and the separately licensed <code>qrisk3.js</code>; QRISK3 is also tested against the bundled original C source. The secondary Steno-IHD/stroke coefficients were checked against Vistisen 2016 Supplemental Table 4. This is an <b>agreement and comparison tool, not an accuracy study</b>: without outcomes it cannot establish which estimate is correct.</p>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Model methods table (scroll horizontally)"><table id="methtable"></table></div>
+          <p><b>Input substitutions.</b> QRISK3 uses a simplified ethnicity mapping, current smoking as light smoking, zero SBP variability and Townsend score, and no unlisted comorbidities or medications. ADVANCE substitutes ACR 10/100/500 mg/g for the albuminuria categories. These assumptions can change the estimates.</p>
+          <p style="margin-top:10px"><b>Recalibration.</b> The SCORE2 family uses its published risk-region mechanism. The optional multiplier scales cumulative hazard for all T1D endpoints as a sensitivity exercise. An observed/expected event-risk ratio is not generally equal to a cumulative-hazard multiplier. This control does not perform or establish local recalibration; endpoint-specific outcome data and calibration methods are needed.</p>
+          <p><b>Literature-only model.</b> The Scottish–Swedish model is discussed in the literature figures but is not implemented here: the sources available to this project do not establish a complete reproducible final-model specification. See the <a href="https://diabepi.shinyapps.io/cvdrisk/">authors’ illustrative tool</a>.</p>
         </div>
       </details>
     </div>
@@ -144,66 +152,103 @@
 
 </div></div>
 <footer>
-  Open-source and self-contained; no data leave the browser. Companion to <i>Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison</i>. <a href="https://github.com/MichaLie/t1d-cvd-risk-calculators/releases/tag/v1.0.0">Version 1.0.0</a>. <b>Research and education only; not for clinical use without local validation and regulatory approval.</b>
+  Open-source and self-contained; patient inputs stay in the browser. Companion to <i>Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison</i>. <b>Version 2.0.0.</b> <b>Research and education only; not for clinical use without local validation and regulatory approval.</b>
 </footer>
 
+<script src="qrisk3.js"></script>
 <script src="models.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const T = window.T1DCVD;
-const inputs = ["age","sex","duration","onset","ethnicity","hba1c","hba1cmmol","sbp","dbp","tc","hdl","tg","egfr","alb","bmi","height","region","oe"];
+const inputs = ["age","sex","duration","onset","ethnicity","hba1c","hba1cmmol","sbp","dbp","tc","hdl","tg","ldl","egfr","alb","bmi","region","oe"];
 const checks = ["smoker","exercise","bptx","statin","af","retino","prior","fh"];
 
-// keep HbA1c % and mmol/mol in sync
-let syncing=false;
-$("hba1c").addEventListener("input",()=>{if(syncing)return;syncing=true;$("hba1cmmol").value=Math.round(T.hba1cPctToMmol(+$("hba1c").value));syncing=false;compute();});
-$("hba1cmmol").addEventListener("input",()=>{if(syncing)return;syncing=true;$("hba1c").value=T.hba1cMmolToPct(+$("hba1cmmol").value).toFixed(1);syncing=false;compute();});
-// auto onset = age - duration unless user overrides
-let onsetTouched=false; $("onset").addEventListener("input",()=>onsetTouched=true);
-["age","duration"].forEach(id=>$(id).addEventListener("input",()=>{if(!onsetTouched)$("onset").value=Math.max(0,(+$("age").value)-(+$("duration").value));}));
+// Preserve the active HbA1c input at full precision; the other field is a display conversion.
+let hba1cSource="hba1c";
+$("hba1c").addEventListener("input",()=>{hba1cSource="hba1c";$("hba1cmmol").value=$("hba1c").value.trim()===""?"":T.hba1cPctToMmol(num("hba1c")).toFixed(2);});
+$("hba1cmmol").addEventListener("input",()=>{hba1cSource="hba1cmmol";$("hba1c").value=$("hba1cmmol").value.trim()===""?"":T.hba1cMmolToPct(num("hba1cmmol")).toFixed(3);});
+// One coherent timeline for all equations.
+["age","duration"].forEach(id=>$(id).addEventListener("input",()=>{$("onset").value=Number.isFinite(num("age")-num("duration"))?(num("age")-num("duration")).toFixed(2):"";}));
 
+function num(id){ const v=$(id).value.trim(); return v===""?NaN:+v; }
 function patient(){
-  const tc=+$("tc").value, hdl=+$("hdl").value, tg=+$("tg").value;
-  const ldl=Math.max(0.3, tc-hdl-tg/2.2);
+  const tc=num("tc"), hdl=num("hdl"), tg=num("tg");
+  const measuredLdl=num("ldl"), ldl=$("ldl").value.trim()===""?tc-hdl-tg/2.2:measuredLdl;
+
   return {
-    age:+$("age").value, female:$("sex").value==="female", ethnicity:$("ethnicity").value,
-    duration:+$("duration").value, onset_age:+$("onset").value,
-    hba1c_pct:+$("hba1c").value, sbp:+$("sbp").value, dbp:+$("dbp").value,
-    total_chol:tc, hdl:hdl, ldl:ldl, tc_hdl_ratio:tc/hdl,
-    egfr:+$("egfr").value, albuminuria:$("alb").value, bmi:+$("bmi").value,
-    height_m:(+$("height").value)||null,
+    age:num("age"), female:$("sex").value==="female", ethnicity:$("ethnicity").value,
+    duration:num("duration"), onset_age:num("age")-num("duration"),
+    hba1c_pct:hba1cSource==="hba1cmmol"?T.hba1cMmolToPct(num("hba1cmmol")):num("hba1c"), sbp:num("sbp"), dbp:num("dbp"),
+    total_chol:tc, hdl:hdl, tg:tg, ldl:ldl, measured_ldl:$("ldl").value.trim()!=="", tc_hdl_ratio:tc/hdl,
+    egfr:num("egfr"), albuminuria:$("alb").value, bmi:num("bmi"),
     smoker:$("smoker").checked, regular_exercise:$("exercise").checked,
     on_bp_treatment:$("bptx").checked, on_statin:$("statin").checked,
     af:$("af").checked, retinopathy:$("retino").checked, prior_cvd:$("prior").checked,
     family_history_cvd:$("fh").checked, risk_region:$("region").value, diabetes:true,
-    ethrisk:({white:1,south_asian:2,black:7})[$("ethnicity").value]||1,
+    ethrisk:({white:1,south_asian:2,black:7,other:9})[$("ethnicity").value]||1,
   };
 }
-function recal(pct,k){ if(!isFinite(pct)||k===1) return pct; return (1-Math.pow(1-pct/100,k))*100; }
-function bandClass(c){return ["low","mod","high"][c];}
+// Plausibility limits (input-error guards, not clinical thresholds). Computation is blocked while any fails,
+// so an empty or impossible field can never silently produce a 0% or 100% estimate.
+function validate(p){
+  const e=[]; const bad=(v,lo,hi)=>!(Number.isFinite(v)&&v>=lo&&v<=hi);
+  if(bad(p.age,18,90)) e.push("Age must be 18–90 years.");
+  if(bad(p.duration,0,80)) e.push("Diabetes duration must be 0–80 years.");
+  else if(Number.isFinite(p.age)&&p.duration>p.age) e.push("Diabetes duration cannot exceed age.");
+  if(bad(p.onset_age,0,90)) e.push("Age at onset must be 0–90 years.");
+  else if(Number.isFinite(p.age)&&p.onset_age>p.age) e.push("Age at onset cannot exceed current age.");
+  if(bad(p.hba1c_pct,4,20)) e.push("HbA1c must be 4–20 % (20–195 mmol/mol).");
+  if(bad(p.sbp,70,260)) e.push("Systolic BP must be 70–260 mmHg.");
+  if(bad(p.dbp,30,160)) e.push("Diastolic BP must be 30–160 mmHg.");
+  else if(Number.isFinite(p.sbp)&&p.dbp>=p.sbp) e.push("Diastolic BP must be below systolic BP.");
+  if(bad(p.total_chol,1,20)) e.push("Total cholesterol must be 1–20 mmol/L.");
+  if(bad(p.hdl,0.2,5)) e.push("HDL cholesterol must be 0.2–5 mmol/L.");
+  else if(Number.isFinite(p.total_chol)&&p.hdl>=p.total_chol) e.push("HDL must be below total cholesterol.");
+  if(bad(p.tg,0,30)) e.push("Triglycerides must be 0–30 mmol/L.");
+  if(!p.measured_ldl && p.tg>=4.5) e.push("Enter measured LDL when triglycerides are ≥4.5 mmol/L; the Friedewald estimate is unsuitable here.");
+  if(bad(p.ldl,0,20) || p.ldl>p.total_chol-p.hdl+0.05) e.push("LDL must be non-negative and no greater than non-HDL cholesterol; check the lipid panel or enter measured LDL.");
+  if(bad(p.egfr,2,200)) e.push("eGFR must be 2–200 mL/min/1.73 m².");
+  if(bad(p.bmi,10,80)) e.push("BMI must be 10–80 kg/m².");
+  return e;
+}
+function recal(pct,k){ if(!isFinite(pct)||k===1) return pct; return (1-Math.pow(1-pct/100,k))*100; } // O/E as cumulative-hazard scaling
+const esc=(t)=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
 
 function compute(){
-  const p=patient(), oe=+$("oe").value;
-  $("derived").innerHTML=`Derived: LDL ≈ <b>${p.ldl.toFixed(1)}</b> · non-HDL ${ (p.total_chol-p.hdl).toFixed(1) } · TC:HDL ${p.tc_hdl_ratio.toFixed(2)} mmol/L · onset age ${p.onset_age}`;
+  const p=patient(), oe=num("oe");
+  const errs=validate(p);
+  if(!Number.isFinite(oe)||oe<0.3||oe>2) errs.push("Hazard multiplier must be 0.3–2.0.");
+  if(errs.length){
+    $("derived").innerHTML="";
+    $("flag").className="flag err";
+    $("flag").innerHTML=`<b>Check inputs before results are shown:</b><ul>${errs.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+    $("summary").innerHTML=""; $("results").innerHTML=""; $("methtable").innerHTML=""; return;
+  }
+  $("derived").innerHTML=`Derived: LDL ${p.measured_ldl?"(measured)":"(estimated)"} <b>${p.ldl.toFixed(1)}</b> mmol/L · non-HDL ${(p.total_chol-p.hdl).toFixed(1)} mmol/L · TC:HDL ${p.tc_hdl_ratio.toFixed(2)} (unitless) · onset age ${p.onset_age.toFixed(2)}`;
   const groups={T1D:[],T2D:[],general:[]};
   const meth=[];
   for(const [name,m] of Object.entries(T.MODELS)){
     let r=m.fn(p);
     if(m.category==="T1D" && isFinite(r)) r=recal(r,oe);
-    groups[m.category].push({name,m,r});
-    meth.push(`<tr><td><b>${name}</b></td><td>${m.category}</td><td>${m.implementationChecked?"selected checks passed":"not source-checked"}</td><td>${m.note}</td></tr>`);
+    const caution=m.extrapolation?m.extrapolation(p):null;
+    groups[m.category].push({name,m,r,caution});
+    meth.push(`<tr><td><b>${name}</b></td><td>${m.category}</td><td>${esc(m.endpoint||"")}</td><td>${m.implementationChecked?"selected checks passed":"not source-checked"}</td><td>${m.note}</td></tr>`);
   }
   // render bars
   const maxR=40;
   const barRow=(o,showBands=true)=>{
-    if(!isFinite(o.r)) return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small></div><div class="bar-val na">n/a</div><div class="na">outside coded age range</div></div>`;
+    if(!isFinite(o.r)){
+      const outside=o.m.ageRange&&(p.age<o.m.ageRange[0]||p.age>=o.m.ageRange[1]+1);
+      const rng=o.m.ageRange?` (${o.m.ageRange[0]}–${o.m.ageRange[1]} y)`:"";
+      return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small>${o.name==="QRISK3"?'<a href="qrisk3-notice.html">QRISK3 disclaimer</a>':""}</div><div class="bar-val na">n/a</div><div class="na">${outside?"outside coded age range"+rng:"calculation unavailable for these inputs"}</div></div>`;
+    }
     const col=o.m.category==="T1D"?"var(--t1d)":o.m.category==="T2D"?"var(--t2d)":"var(--gen)";
     const w=Math.min(100,o.r/maxR*100), t10=10/maxR*100, t20=20/maxR*100;
     const markers=showBands?`<div class="thr" style="left:${t10}%"></div><div class="thr t20" style="left:${t20}%"></div>`:"";
-    return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small></div>
+    const caution=o.caution?`<div class="bar-caution">⚠ ${esc(o.caution)}</div>`:"";
+    return `<div class="bar-row"><div class="bar-name">${o.name}<small>${o.m.horizon}</small>${o.name==="QRISK3"?'<a href="qrisk3-notice.html">QRISK3 disclaimer</a>':""}</div>
       <div class="bar-val">${o.r.toFixed(1)}%</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}"></div>
-        ${markers}</div></div>`;
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}"></div>${markers}</div></div>${caution}`;
   };
   const sec=(title,arr,showBands=true,note="")=>arr.length?`<div class="res-group"><h3>${title}</h3>${arr.map(o=>barRow(o,showBands)).join("")}${note?`<div class="na">${note}</div>`:""}</div>`:"";
   const t1dTen=groups.T1D.filter(o=>o.m.horizon==="10y");
@@ -212,24 +257,15 @@ function compute(){
     sec("Type 1 diabetes–specific — 10-year endpoints",t1dTen)+
     sec("Type 1 diabetes–specific — native five-year endpoint",t1dFive,false,"Shown without the common 10-year analytic boundaries and excluded from the agreement matrix.")+
     sec("Type-2-derived (off-label in T1D)",groups.T2D)+
-    sec("General-population (off-label in T1D)",groups.general);
-  $("methtable").innerHTML=`<tr><td><b>Tool</b></td><td><b>Class</b></td><td><b>Implementation check</b></td><td><b>Note</b></td></tr>`+meth.join("");
+    sec("General / mixed-population models",groups.general);
+  $("methtable").innerHTML=`<tr><td><b>Tool</b></td><td><b>Class</b></td><td><b>Endpoint</b></td><td><b>Implementation check</b></td><td><b>Note</b></td></tr>`+meth.join("");
 
-  // discordance among 10-yr T1D-specific tools (exclude Cederholm 5y)
-  const prim=groups.T1D.filter(o=>o.m.horizon==="10y"&&isFinite(o.r)).map(o=>o.r);
-  if(prim.length>=2){
-    const lo=Math.min(...prim), hi=Math.max(...prim), cats=new Set(prim.map(T.band));
-    const lab=["<10%","10–<20%","≥20%"];
-    const orderedCats=[...cats].sort((a,b)=>a-b);
-    $("summary").innerHTML=`Dedicated T1D tools estimate <b>${lo.toFixed(1)}–${hi.toFixed(1)}%</b> 10-yr CVD risk (${orderedCats.map(c=>lab[c]).join(" ↔ ")}).`;
-    if(cats.size>1){
-      $("flag").className="flag";
-      $("flag").innerHTML=`⚠ <b>Discordant.</b> The included T1D-specific engines fall into different common analytic bands. These bands are not universal treatment thresholds. Treat the outputs as a range, and interpret them in the relevant endpoint, eligibility, calibration and guideline context.`;
-    } else {
-      $("flag").className="flag ok";
-      $("flag").innerHTML=`✓ The included T1D-specific engines fall within the same common analytic band (<b>${lab[orderedCats[0]]}</b>). Other tools may still return different values; this comparison does not establish which estimate is more accurate.`;
-    }
-  } else { $("flag").innerHTML=""; $("summary").innerHTML=""; }
+  let flagHtml="";
+  if(p.prior_cvd){
+    flagHtml+=`<div class="flag">⚠ <b>Prior CVD is ticked.</b> All tools except Cederholm were derived in people <i>without</i> prior cardiovascular disease; their outputs do not apply to secondary prevention, where guidelines assign very-high risk irrespective of any score. Only the Cederholm 5-year model contains a prior-CVD term.</div>`;
+  }
+  $("summary").innerHTML="Outputs describe different endpoints. Common analytic bands are not treatment thresholds.";
+  $("flag").className=""; $("flag").innerHTML=flagHtml;
 }
 inputs.forEach(id=>$(id).addEventListener("input",compute));
 inputs.forEach(id=>$(id).addEventListener("change",compute));

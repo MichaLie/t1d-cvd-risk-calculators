@@ -1,0 +1,3 @@
+variant,n_scored,mean_risk_percent,median_risk_percent,band_lt10_n,band_10_to_lt20_n,band_ge20_n,kappa_vs_steno_cvd,n_vs_steno_cvd,exact_agreement_vs_steno_cvd_percent,kappa_vs_score2_diabetes,n_vs_score2_diabetes,exact_agreement_vs_score2_diabetes_percent,kappa_vs_primary_specification,exact_agreement_vs_primary_specification_percent
+"SCORE2 (as deployed, diabetes term 0; primary)",5976,4.04542971611269,3.038550003469487,5596,367,13,0.020099718376816678,5976,17.101740294511377,0.04364826746985162,5976,32.295850066934406,1.0,100.0
+SCORE2 (published diabetes term applied),5976,8.318045844558357,6.978525786156501,4171,1577,228,0.1280363685526864,5976,26.422356091030792,0.2552362359631002,5976,40.77978580990629,0.25300273291683095,72.84136546184739
