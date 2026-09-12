@@ -210,7 +210,7 @@ def main():
         ("Blood-pressure treatment", "If SBP >140 mmHg, probability 0.60; otherwise no", "Derived stochastic flag"),
         ("Total cholesterol", "Normal(mean 4.7, SD 0.9), clipped to 2.8-8.0 mmol/L", "Simulated"),
         ("HDL cholesterol", "Normal(mean 1.5, SD 0.4), clipped to 0.6-3.0 mmol/L", "Simulated"),
-        ("Triglycerides", "Log-normal(log mean 1.1, sigma 0.4), clipped to 0.4-6.0 mmol/L", "Simulated"),
+        ("Triglycerides", "Log-normal(mu=ln(1.1), sigma=0.4), clipped to 0.4-6.0 mmol/L", "Simulated"),
         ("LDL cholesterol", "Friedewald: total cholesterol - HDL - triglycerides/2.2; minimum 0.3", "Derived"),
         ("eGFR", "Normal(mean 102, SD 16) - 0.25*(age-40) - 0.35*duration; clipped to 15-140", "Simulated with imposed dependence"),
         ("Albuminuria", "Prevalence increases with duration and HbA1c; 65% of abnormal cases microalbuminuria", "Simulated with imposed dependence"),
