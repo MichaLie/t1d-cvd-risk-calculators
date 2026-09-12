@@ -6,6 +6,8 @@ authors:
   - family-names: "Liegertová"
     given-names: "Michaela"
 version: 2.0.0
+doi: "10.5281/zenodo.22720993"
+date-released: 2026-09-12
 repository-code: "https://github.com/MichaLie/t1d-cvd-risk-calculators"
 url: "https://michalie.github.io/t1d-cvd-risk-calculators/metatool/"
 license:

@@ -23,7 +23,7 @@ python -m pip install --require-hashes -r requirements-lock.txt
 python -m eval.verify
 ```
 
-This command runs the numerical, input-handling and Python/JavaScript checks; compares QRISK3 against the bundled original C source; regenerates the seeded analysis and sensitivity tables; and builds all six figures. It writes generated tables to `eval/out/` and final PDF/600-dpi PNG artwork to `submission_figures/`. The continuous-integration workflow runs the same command. Tests establish specified implementation properties, not clinical validation.
+This command runs the numerical, input-handling and Python/JavaScript checks; compares QRISK3 against the bundled original C source; regenerates the seeded analysis and sensitivity tables; and builds the six main figures. It writes generated tables to `eval/out/` and final PDF/600-dpi PNG artwork to `submission_figures/`. The continuous-integration workflow runs the same command. Tests establish specified implementation properties, not clinical validation.
 
 For analysis or figure generation separately:
 
@@ -34,10 +34,10 @@ python -m eval.robustness
 python -m eval.build_submission_figures
 ```
 
-The primary cohort contains 10,000 profiles, seed 20260613. Only compact final summary tables are versioned; per-profile and pair-level tables are reproducible generated outputs. [Results documentation](eval/out/README.md) describes their interpretation. Literature values and publication locators are stored in `eval/figure_data.json`. Figure titles and explanatory notes are supplied as separate legends, without embedded captions in the artwork.
+The primary cohort contains 10,000 profiles, seed 20260613. Only compact final summary tables are versioned; per-profile and pair-level tables are reproducible generated outputs. [Results documentation](eval/out/README.md) describes their interpretation. Literature values and publication locators are stored in `eval/figure_data.json`. Figure titles and explanatory notes are supplied as separate legends, without embedded captions in the artwork. [Supplementary Figure S1](submission_figures/Supplementary_Figure_S1_calculator_interface.pdf) is a static capture of the version 2.0.0 browser interface using a synthetic example; it is supplied separately from the six generated figures.
 
 ## Citation and licensing
 
-Use [CITATION.cff](CITATION.cff) and cite the archived software version actually used. The associated manuscript title is given above; it does not imply that the manuscript has been published. A DOI for this software version must identify the corresponding archived release.
+Use [CITATION.cff](CITATION.cff) and cite the archived software version actually used. The associated manuscript title is given above; it does not imply that the manuscript has been published. Version 2.0.0 is archived at [doi:10.5281/zenodo.22720993](https://doi.org/10.5281/zenodo.22720993).
 
 Original project code is MIT licensed. The QRISK3 Python/JavaScript ports and bundled ClinRisk C source are **LGPL-3.0-or-later**, with the upstream disclaimer and full licence texts included. Dataset and figure reuse is covered by CC BY 4.0; QRISK3 outputs must retain the [QRISK3 notice and disclaimer](third_party/qrisk3/NOTICE.md). See [LICENSE](LICENSE) for the scope of each licence.
