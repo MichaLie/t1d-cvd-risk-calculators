@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "Please cite the archived software version used and the associated manuscript."
-title: "Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison"
+message: "Please cite the archived software version you used."
+title: "Cardiovascular risk calculators in type 1 diabetes: an open comparison tool and in-silico agreement analysis"
 type: software
 authors:
   - family-names: "Liegertová"

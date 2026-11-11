@@ -1,6 +1,6 @@
-# Cardiovascular risk prediction in type 1 diabetes: critical appraisal of current tools and an in-silico head-to-head comparison
+# Cardiovascular risk calculators in type 1 diabetes: an open comparison tool and in-silico agreement analysis
 
-Companion research software, version **2.0.0**, for the manuscript with the title above. The browser tool compares published risk equations; the Python pipeline measures their agreement in a reproducible synthetic type 1 diabetes cohort. No patient records or observed cardiovascular outcomes are included. Agreement does not establish predictive accuracy, calibration, clinical benefit or suitability for treatment decisions.
+Research software, version **2.0.0**. The browser tool compares published risk equations; the Python pipeline measures their agreement in a reproducible synthetic type 1 diabetes cohort. No patient records or observed cardiovascular outcomes are included. Agreement does not establish predictive accuracy, calibration, clinical benefit or suitability for treatment decisions.
 
 [Open the browser calculator](https://michalie.github.io/t1d-cvd-risk-calculators/metatool/) · [Methods and model scope](METHODS.md) · [Figure legends](submission_figures/FIGURE_LEGENDS.md)
 
@@ -38,6 +38,6 @@ The primary cohort contains 10,000 profiles, seed 20260613. Only compact final s
 
 ## Citation and licensing
 
-Use [CITATION.cff](CITATION.cff) and cite the archived software version actually used. The associated manuscript title is given above; it does not imply that the manuscript has been published. Version 2.0.0 is archived at [doi:10.5281/zenodo.22720993](https://doi.org/10.5281/zenodo.22720993).
+Use [CITATION.cff](CITATION.cff) and cite the archived software version actually used. Version 2.0.0 is archived at [doi:10.5281/zenodo.22720993](https://doi.org/10.5281/zenodo.22720993).
 
 Original project code is MIT licensed. The QRISK3 Python/JavaScript ports and bundled ClinRisk C source are **LGPL-3.0-or-later**, with the upstream disclaimer and full licence texts included. Dataset and figure reuse is covered by CC BY 4.0; QRISK3 outputs must retain the [QRISK3 notice and disclaimer](third_party/qrisk3/NOTICE.md). See [LICENSE](LICENSE) for the scope of each licence.
